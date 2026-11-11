@@ -1,6 +1,6 @@
-{'version': '4.7.1',
+{'version': '4.7.2',
  'url': 'https://libtiff.gitlab.io/libtiff',
- 'downloads': ['https://github.com/libsdl-org/libtiff/archive/refs/tags/v4.7.1.tar.gz'],
+ 'downloads': ['https://github.com/libsdl-org/libtiff/archive/refs/tags/v4.7.2.tar.gz'],
  'license': ['LICENSE.md'],
  'dependencies': ['ZLib', 'LibJPEG-Turbo'],
  'cmake': ['-Dtiff-tools=OFF',

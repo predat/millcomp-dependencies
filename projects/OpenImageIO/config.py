@@ -1,6 +1,6 @@
-{'version': '3.2.1.2',
+{'version': '3.2.2.0',
  'url': 'https://openimageio.org',
- 'downloads': ['https://github.com/AcademySoftwareFoundation/OpenImageIO/archive/refs/tags/v3.2.1.2.tar.gz'],
+ 'downloads': ['https://github.com/AcademySoftwareFoundation/OpenImageIO/archive/refs/tags/v3.2.2.0.tar.gz'],
  'license': ['LICENSE.md'],
  'dependencies': ['OpenEXR',
                   'OpenColorIO',
