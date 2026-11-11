@@ -12,6 +12,7 @@ import hashlib
 import json
 import os
 import pathlib
+import re
 import shutil
 import subprocess
 import sys
@@ -273,6 +274,30 @@ def auditLinux(buildDir):
     print(f"audit: {len(files)} files, nothing from the build machine")
 
 
+def relocate(buildDir):
+    """Makes the CMake and pkg-config files relative to where they are: some record the install prefix as an absolute
+    path (pxrConfig.cmake records Python's), which exists on the build machine only. Running it again changes nothing."""
+    prefix = re.compile(re.escape(buildDir.as_posix()), re.IGNORECASE if PLATFORM == "windows" else 0)
+    changed = []
+    for path in sorted(list(buildDir.rglob("*.cmake")) + list(buildDir.rglob("*.pc"))):
+        if path.is_symlink() or not path.is_file():
+            continue
+        text = path.read_bytes().decode("utf-8", "surrogateescape")
+        if not prefix.search(text):
+            continue
+        relative = os.path.relpath(buildDir, path.parent).replace(os.sep, "/")
+        if path.suffix == ".pc":
+            here = f"${{pcfiledir}}/{relative}"
+        else:
+            here = f"${{CMAKE_CURRENT_LIST_DIR}}/{relative}"
+            # A bracket argument, [[...]], expands no variable: make those that hold the prefix quoted arguments.
+            text = re.sub(r"\[\[([^\]\"]*)\]\]", lambda match: f'"{match.group(1)}"' if prefix.search(match.group(1)) else match.group(0), text)
+        text = prefix.sub(lambda match: here, text)
+        path.write_bytes(text.encode("utf-8", "surrogateescape"))
+        changed.append(path.relative_to(buildDir).as_posix())
+    print(f"relocate: {len(changed)} files" + "".join(f"\n  {name}" for name in changed))
+
+
 def package(buildDir, output):
     excluded = lambda relative: any(fnmatch.fnmatch(relative, pattern) for pattern in EXCLUDED)
     top = f"millcompDependencies-{VERSION}-{PLATFORM}"
@@ -356,6 +381,7 @@ def main():
         writeManifest(projects, names, lock, buildDir)
         if PLATFORM == "linux":
             auditLinux(buildDir)
+        relocate(buildDir)
         package(buildDir, pathlib.Path(arguments.output).resolve())
 
 

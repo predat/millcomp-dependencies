@@ -33,5 +33,8 @@ target_link_libraries(
         Qt6::Widgets
         Qt6::Svg
         Qt6::ShaderTools
+        # rhi/*.h, Qt's semi-public RHI API, are in the private include directories.
+        Qt6::GuiPrivate
+        Qt6::ShaderToolsPrivate
 )
 nanobind_add_module(_smoke NB_STATIC module.cpp)

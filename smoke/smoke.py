@@ -45,6 +45,7 @@ def main():
                 "cmake", "-S", str(HERE), "-B", str(build), "-G", "Ninja", "-DCMAKE_BUILD_TYPE=Release", "-Wno-dev",
                 f"-DCMAKE_PREFIX_PATH={deps.as_posix()};{(deps / 'qt').as_posix()}",
                 f"-DPython_ROOT_DIR={(deps / 'python').as_posix()}", "-DPython_FIND_STRATEGY=LOCATION",
+                f"-DPython3_ROOT_DIR={(deps / 'python').as_posix()}", "-DPython3_FIND_STRATEGY=LOCATION",
                 "-DCMAKE_FIND_USE_PACKAGE_REGISTRY=OFF",
             ],
             check=True, env=environment,
