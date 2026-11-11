@@ -12,4 +12,5 @@
            '-DMATERIALX_BUILD_TESTS=OFF',
            '-DMATERIALX_BUILD_RENDER_PLATFORMS=OFF',
            '-DMATERIALX_INSTALL_RESOURCES=OFF',
-           '-DMATERIALX_BUILD_USE_CCACHE=OFF']}
+           '-DMATERIALX_BUILD_USE_CCACHE=OFF'],
+ 'commands:linux': [['cmake', '-DCONFIG={buildDir}/lib/cmake/MaterialX/MaterialXConfig.cmake', '-P', '{projectDir}/noX11.cmake']]}
