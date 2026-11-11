@@ -1,0 +1,8 @@
+{'version': '3.11.18',
+ 'url': 'https://www.python.org',
+ 'downloads:linux': ['https://github.com/astral-sh/python-build-standalone/releases/download/20261026/cpython-3.11.18%2B20261026-x86_64-unknown-linux-gnu-install_only.tar.gz'],
+ 'downloads:windows': ['https://github.com/astral-sh/python-build-standalone/releases/download/20261026/cpython-3.11.18%2B20261026-x86_64-pc-windows-msvc-install_only.tar.gz'],
+ 'extractTo': '{buildDir}/python',
+ 'license:linux': ['lib/python3.11/LICENSE.txt'],
+ 'license:windows': ['LICENSE.txt'],
+ 'commands': [['{python}', '-m', 'pip', 'install', '--no-cache-dir', 'numpy==2.4.6']]}

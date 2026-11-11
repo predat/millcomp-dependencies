@@ -1,0 +1,13 @@
+{'version': '2.6.0',
+ 'url': 'https://opencolorio.org',
+ 'downloads': ['https://github.com/AcademySoftwareFoundation/OpenColorIO/archive/refs/tags/v2.6.0.tar.gz'],
+ 'license': ['LICENSE'],
+ 'dependencies': ['Imath', 'ZLib'],
+ 'cmake': ['-DOCIO_INSTALL_EXT_PACKAGES=MISSING',
+           '-DOCIO_BUILD_APPS=OFF',
+           '-DOCIO_BUILD_PYTHON=OFF',
+           '-DOCIO_BUILD_TESTS=OFF',
+           '-DOCIO_BUILD_GPU_TESTS=OFF',
+           '-DOCIO_BUILD_DOCS=OFF',
+           '-DOCIO_BUILD_JAVA=OFF',
+           '-DOCIO_USE_SIMD=ON']}

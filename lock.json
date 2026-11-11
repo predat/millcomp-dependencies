@@ -1,0 +1,23 @@
+{
+  "https://github.com/AcademySoftwareFoundation/Imath/archive/refs/tags/v3.2.2.tar.gz": "b4275d83fb95521510e389b8d13af10298ed5bed1c8e13efd961d91b1105e462",
+  "https://github.com/AcademySoftwareFoundation/OpenColorIO/archive/refs/tags/v2.6.0.tar.gz": "784ac37bde5b9c6e5dc15f23d1235bd1452d376cdc03627d6d6dd310f375a735",
+  "https://github.com/AcademySoftwareFoundation/OpenImageIO/archive/refs/tags/v3.2.1.2.tar.gz": "3f4ccfbd9ef40098bcc81bbdcd7f9d4ed97724bb2f4de92daf2310885704404e",
+  "https://github.com/AcademySoftwareFoundation/openexr/archive/refs/tags/v3.5.3.tar.gz": "ff1de95f4031c1c57c633e647dc97c15282d3aa3bc7fb90745f00f74de4a054f",
+  "https://github.com/KhronosGroup/Vulkan-Headers/archive/refs/tags/v1.4.363.tar.gz": "cbaf687d3c59b9666fe080e7f8396b6b4f4d344a768ee6b337c59852f4526b68",
+  "https://github.com/KhronosGroup/Vulkan-Loader/archive/refs/tags/v1.4.363.tar.gz": "cc520304a4d8de9a6a1699553d6090aef0c25f87ef6cbc16b7c84ebd99093264",
+  "https://github.com/PixarAnimationStudios/OpenUSD/archive/refs/tags/v26.11.1.tar.gz": "7670896e224ba18cd3cdb7cb58c149eea71af0d83c1120bc7040c1e581c1a559",
+  "https://github.com/Tessil/robin-map/archive/refs/tags/v1.4.0.tar.gz": "7930dbf9634acfc02686d87f615c0f4f33135948130b8922331c16d90a03250c",
+  "https://github.com/astral-sh/python-build-standalone/releases/download/20261026/cpython-3.11.18%2B20261026-x86_64-pc-windows-msvc-install_only.tar.gz": "75cb501dc11c7b55c6b447c58e4910bce5b1f609f1017328b4f3a858dfaf5428",
+  "https://github.com/astral-sh/python-build-standalone/releases/download/20261026/cpython-3.11.18%2B20261026-x86_64-unknown-linux-gnu-install_only.tar.gz": "a87ee63646c8f8438b7af3954b2135ed2af91d033c631f12a8f20af903046d06",
+  "https://github.com/fmtlib/fmt/archive/refs/tags/12.1.0.tar.gz": "ea7de4299689e12b6dddd392f9896f08fb0777ac7168897a244a6d6085043fea",
+  "https://github.com/freetype/freetype/archive/refs/tags/VER-2-14-1.tar.gz": "44bd69d1f0750603410cfd4f26f1c5523c5a3a087a2dfa8639b757dc7c6677be",
+  "https://github.com/google/googletest/archive/refs/tags/v1.18.0.tar.gz": "6e3191c1455468b3fc35a417fb565c1c5071aee1b7e7f85e30cf48a98d37d8b5",
+  "https://github.com/libjpeg-turbo/libjpeg-turbo/archive/refs/tags/3.1.2.tar.gz": "560f6338b547544c4f9721b18d8b87685d433ec78b3c644c70d77adad22c55e6",
+  "https://github.com/libsdl-org/libtiff/archive/refs/tags/v4.7.1.tar.gz": "a3faec056a490c62b8749847317521204f8c4d9933cce834e691a74524ec38fe",
+  "https://github.com/madler/zlib/archive/refs/tags/v1.3.1.tar.gz": "17e88863f3600672ab49182f217281b6fc4d3c762bde361935e436a95214d05c",
+  "https://github.com/pnggroup/libpng/archive/refs/tags/v1.6.50.tar.gz": "71158e53cfdf2877bc99bcab33641d78df3f48e6e0daad030afe9cb8c031aa46",
+  "https://github.com/shader-slang/slang/releases/download/v2026.18.2/slang-2026.18.2-linux-x86_64.tar.gz": "8a097d4365e1cab10265d0b0d77b461b5d30576f99ddc0521a35723c34cad816",
+  "https://github.com/shader-slang/slang/releases/download/v2026.18.2/slang-2026.18.2-windows-x86_64.zip": "747602aec6b3623658d55fea87492d71828e15d16802d7941204fde418ceee8e",
+  "https://github.com/uxlfoundation/oneTBB/archive/refs/tags/v2023.2.0.tar.gz": "80cb62e62defeee67ea1885a6f72d97ac81404f8fde9cded62fb51524808a30c",
+  "https://github.com/wjakob/nanobind/archive/refs/tags/v3.1.0.tar.gz": "39659890a112e84e7263e4a263c71dd2621f866f7a4386ce95ef410e6c0e5c2f"
+}

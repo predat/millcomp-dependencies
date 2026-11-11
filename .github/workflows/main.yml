@@ -1,0 +1,88 @@
+name: dependencies
+
+# A tag vX.Y.Z (VERSION's) publishes the archives as a release. Everything else builds and keeps them as artifacts.
+on:
+  push:
+    branches: [main]
+    tags: ["v*"]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-24.04
+            platform: linux
+          - os: windows-2025
+            platform: windows
+    runs-on: ${{ matrix.os }}
+    # GitHub's limit is 360. The cache saved below lets a rerun go on with what was built.
+    timeout-minutes: 350
+    env:
+      WORK: ${{ matrix.platform == 'windows' && 'D:/w' || 'build/work' }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Tools
+        run: python -m pip install cmake==4.3.2 ninja==1.13.0
+
+      - name: Linux packages
+        if: matrix.platform == 'linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y g++-14 libgl-dev libegl-dev libx11-dev libxkbcommon-dev libxcb-cursor0 nasm
+          echo "CC=gcc-14" >> "$GITHUB_ENV"
+          echo "CXX=g++-14" >> "$GITHUB_ENV"
+
+      - name: MSVC environment
+        if: matrix.platform == 'windows'
+        uses: ilammy/msvc-dev-cmd@v1
+
+      - name: Restore what was built
+        uses: actions/cache/restore@v4
+        with:
+          path: build/install
+          key: deps-${{ matrix.platform }}-${{ hashFiles('build.py', 'lock.json', 'projects/**') }}-${{ github.run_id }}
+          restore-keys: deps-${{ matrix.platform }}-
+
+      - name: Build and pack
+        run: python build.py --work-dir ${{ env.WORK }} --package
+
+      - name: Save what was built
+        if: always()
+        uses: actions/cache/save@v4
+        with:
+          path: build/install
+          key: deps-${{ matrix.platform }}-${{ hashFiles('build.py', 'lock.json', 'projects/**') }}-${{ github.run_id }}-${{ github.run_attempt }}
+
+      - name: Archive complete and relocatable
+        shell: bash
+        run: python smoke/smoke.py "$(ls build/package/millcompDependencies-* | grep -v sha256)"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: millcompDependencies-${{ matrix.platform }}
+          path: build/package/*
+          retention-days: 14
+          compression-level: 0
+
+  release:
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: build
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          merge-multiple: true
+      - env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release create "$GITHUB_REF_NAME" --repo "$GITHUB_REPOSITORY" --title "$GITHUB_REF_NAME" --notes "millComp's dependencies, $GITHUB_REF_NAME" millcompDependencies-*

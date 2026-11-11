@@ -1,0 +1,11 @@
+{'version': '3.5.3',
+ 'url': 'https://openexr.com',
+ 'downloads': ['https://github.com/AcademySoftwareFoundation/openexr/archive/refs/tags/v3.5.3.tar.gz'],
+ 'license': ['LICENSE.md'],
+ 'dependencies': ['Imath', 'ZLib'],
+ 'cmake': ['-DBUILD_TESTING=OFF',
+           '-DOPENEXR_BUILD_TOOLS=OFF',
+           '-DOPENEXR_BUILD_EXAMPLES=OFF',
+           '-DOPENEXR_INSTALL_TOOLS=OFF',
+           '-DOPENEXR_INSTALL_EXAMPLES=OFF',
+           '-DOPENEXR_BUILD_PYTHON=OFF']}

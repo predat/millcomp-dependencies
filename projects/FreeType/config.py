@@ -1,0 +1,10 @@
+{'version': '2.14.1',
+ 'url': 'https://freetype.org',
+ 'downloads': ['https://github.com/freetype/freetype/archive/refs/tags/VER-2-14-1.tar.gz'],
+ 'license': ['LICENSE.TXT'],
+ 'dependencies': ['ZLib', 'LibPNG'],
+ 'cmake': ['-DFT_DISABLE_BZIP2=ON',
+           '-DFT_DISABLE_HARFBUZZ=ON',
+           '-DFT_DISABLE_BROTLI=ON',
+           '-DFT_REQUIRE_ZLIB=ON',
+           '-DFT_REQUIRE_PNG=ON']}
