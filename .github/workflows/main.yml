@@ -49,12 +49,13 @@ jobs:
         if: matrix.platform == 'windows'
         uses: ilammy/msvc-dev-cmd@v1
 
+      # v2: build.py records what each project installs since; caches without the records start again.
       - name: Restore what was built
         uses: actions/cache/restore@v4
         with:
           path: build/install
-          key: deps-${{ matrix.platform }}-${{ hashFiles('build.py', 'lock.json', 'projects/**') }}-${{ github.run_id }}
-          restore-keys: deps-${{ matrix.platform }}-
+          key: deps-v2-${{ matrix.platform }}-${{ hashFiles('build.py', 'lock.json', 'projects/**') }}-${{ github.run_id }}
+          restore-keys: deps-v2-${{ matrix.platform }}-
 
       - name: Build and pack
         run: python build.py --work-dir ${{ env.WORK }} --package
@@ -64,7 +65,7 @@ jobs:
         uses: actions/cache/save@v4
         with:
           path: build/install
-          key: deps-${{ matrix.platform }}-${{ hashFiles('build.py', 'lock.json', 'projects/**') }}-${{ github.run_id }}-${{ github.run_attempt }}
+          key: deps-v2-${{ matrix.platform }}-${{ hashFiles('build.py', 'lock.json', 'projects/**') }}-${{ github.run_id }}-${{ github.run_attempt }}
 
       - name: Archive complete and relocatable
         shell: bash

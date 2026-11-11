@@ -15,6 +15,7 @@ find_package(Vulkan REQUIRED)
 find_package(slang CONFIG REQUIRED)
 find_package(GTest REQUIRED CONFIG)
 find_package(nanobind CONFIG REQUIRED)
+find_package(MaterialX 1.39 REQUIRED CONFIG)
 find_package(Qt6 6.12 REQUIRED COMPONENTS Widgets GuiPrivate ShaderTools ShaderToolsPrivate Svg Test)
 
 add_executable(smoke smoke.cpp)
@@ -30,6 +31,10 @@ target_link_libraries(
         tf
         Vulkan::Vulkan
         slang::slang
+        MaterialXCore
+        MaterialXFormat
+        MaterialXGenShader
+        MaterialXGenSlang
         Qt6::Widgets
         Qt6::Svg
         Qt6::ShaderTools

@@ -263,6 +263,29 @@ def buildProject(name, project, buildDir, workDir, archives, lock, jobs):
     shutil.rmtree(work, ignore_errors=True)
 
 
+def installed(buildDir):
+    """What the install prefix holds, files and symlinks, but .stamps."""
+    return {path.relative_to(buildDir).as_posix() for path in buildDir.rglob("*") if (path.is_file() or path.is_symlink()) and path.relative_to(buildDir).parts[0] != ".stamps"}
+
+
+def uninstall(buildDir, name):
+    """Removes what project `name` installed last time (.stamps/<name>.files), and the directories it leaves empty: an
+    update leaves no file of the previous version (libvulkan.so.1.4.363 next to libvulkan.so.1.4.368)."""
+    record = buildDir / ".stamps" / f"{name}.files"
+    if not record.exists():
+        return
+    directories = set()
+    for relative in record.read_text().splitlines():
+        path = buildDir / relative
+        if path.is_symlink() or path.is_file():
+            path.unlink()
+            directories.update(path.parents)
+    for directory in sorted(directories, key=lambda path: len(path.parts), reverse=True):
+        if directory != buildDir and buildDir in directory.parents and directory.is_dir() and not any(directory.iterdir()):
+            directory.rmdir()
+    record.unlink()
+
+
 def writeManifest(projects, names, lock, buildDir):
     manifest = {
         "version": VERSION,
@@ -425,6 +448,12 @@ def main():
     # On this platform only: a `platforms` list leaves a project out, and those that need it must say so too.
     names = [name for name in names if PLATFORM in projects[name].get("platforms", [PLATFORM])]
     current = digests(projects, names, lock)
+    # A project no longer built here (removed, or not for this platform): its files go.
+    for record in stamps.glob("*.files"):
+        if record.stem not in names:
+            print(f"removing {record.stem}", flush=True)
+            uninstall(buildDir, record.stem)
+            (stamps / record.stem).unlink(missing_ok=True)
     for index, name in enumerate(names):
         stamp = stamps / name
         if stamp.exists() and stamp.read_text() == current[name]:
@@ -432,7 +461,10 @@ def main():
             continue
         print(f"[{index + 1}/{len(names)}] {name} {projects[name].get('version', '')}", flush=True)
         stamp.unlink(missing_ok=True)
+        uninstall(buildDir, name)
+        before = installed(buildDir)
         buildProject(name, projects[name], buildDir, workDir, archives, lock, arguments.jobs)
+        (stamps / f"{name}.files").write_text("".join(f"{path}\n" for path in sorted(installed(buildDir) - before)))
         stamp.write_text(current[name])
 
     if arguments.package:

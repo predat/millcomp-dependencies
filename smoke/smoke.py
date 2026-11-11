@@ -54,7 +54,7 @@ def main():
             check=True, env=environment,
         )  # fmt: skip
         subprocess.run(["cmake", "--build", str(build), "-j", str(arguments.jobs)], check=True, env=environment)
-        subprocess.run([str(build / ("smoke.exe" if windows else "smoke")), str(temporary)], check=True, env=environment)
+        subprocess.run([str(build / ("smoke.exe" if windows else "smoke")), str(temporary), str(deps)], check=True, env=environment)
 
         environment["PYTHONPATH"] = os.pathsep.join([str(build), str(deps / "lib/python")])
         check = "import _smoke, numpy; from pxr import Usd, Sdf; assert _smoke.answer() == 42 and Usd.Stage.CreateInMemory(); print('Python:', numpy.__version__)"

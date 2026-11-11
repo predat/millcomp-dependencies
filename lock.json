@@ -1,5 +1,6 @@
 {
   "https://github.com/AcademySoftwareFoundation/Imath/archive/refs/tags/v3.2.3.tar.gz": "e10c12b3f21f45bf08e09d4215d9c7691368d747beebd840de0b6fefed2df9f8",
+  "https://github.com/AcademySoftwareFoundation/MaterialX/archive/refs/tags/v1.39.5.tar.gz": "c0d739b70a36f6f72888a0e8e66db5c83ae87c40737cc9b51c108166804f3a3b",
   "https://github.com/AcademySoftwareFoundation/OpenColorIO/archive/refs/tags/v2.6.0.tar.gz": "784ac37bde5b9c6e5dc15f23d1235bd1452d376cdc03627d6d6dd310f375a735",
   "https://github.com/AcademySoftwareFoundation/OpenImageIO/archive/refs/tags/v3.2.2.0.tar.gz": "fa94876cfbd4c817deaba81ced8bad4af2956689faf4085f277b20197cd70b4e",
   "https://github.com/AcademySoftwareFoundation/openexr/archive/refs/tags/v3.5.3.tar.gz": "ff1de95f4031c1c57c633e647dc97c15282d3aa3bc7fb90745f00f74de4a054f",
@@ -11,7 +12,6 @@
   "https://github.com/astral-sh/python-build-standalone/releases/download/20261026/cpython-3.11.18%2B20261026-aarch64-apple-darwin-install_only.tar.gz": "cba3455e18516fbe8668cff2820c9b6a53447c552d612443c2b2fb60d390a908",
   "https://github.com/astral-sh/python-build-standalone/releases/download/20261026/cpython-3.11.18%2B20261026-x86_64-pc-windows-msvc-install_only.tar.gz": "75cb501dc11c7b55c6b447c58e4910bce5b1f609f1017328b4f3a858dfaf5428",
   "https://github.com/astral-sh/python-build-standalone/releases/download/20261026/cpython-3.11.18%2B20261026-x86_64-unknown-linux-gnu-install_only.tar.gz": "a87ee63646c8f8438b7af3954b2135ed2af91d033c631f12a8f20af903046d06",
-  "https://github.com/facebook/zstd/releases/download/v1.5.7/zstd-1.5.7.tar.gz": "eb33e51f49a15e023950cd7825ca74a4a2b43db8354825ac24fc1b7ee09e6fa3",
   "https://github.com/fmtlib/fmt/archive/refs/tags/12.1.0.tar.gz": "ea7de4299689e12b6dddd392f9896f08fb0777ac7168897a244a6d6085043fea",
   "https://github.com/freetype/freetype/archive/refs/tags/VER-2-14-1.tar.gz": "44bd69d1f0750603410cfd4f26f1c5523c5a3a087a2dfa8639b757dc7c6677be",
   "https://github.com/google/googletest/archive/refs/tags/v1.18.0.tar.gz": "6e3191c1455468b3fc35a417fb565c1c5071aee1b7e7f85e30cf48a98d37d8b5",
@@ -19,9 +19,9 @@
   "https://github.com/libsdl-org/libtiff/archive/refs/tags/v4.7.2.tar.gz": "dd030ae5d6483033bd88d840fc97e36adc3022b844d9d896a3b5a50f2d660d6f",
   "https://github.com/madler/zlib/archive/refs/tags/v1.3.1.tar.gz": "17e88863f3600672ab49182f217281b6fc4d3c762bde361935e436a95214d05c",
   "https://github.com/pnggroup/libpng/archive/refs/tags/v1.6.59.tar.gz": "2540302a1844ad2b2b501977abecfa850f265f97b78f065a712ab4074a89f5b5",
-  "https://github.com/shader-slang/slang/releases/download/v2026.18.2/slang-2026.18.2-linux-x86_64.tar.gz": "8a097d4365e1cab10265d0b0d77b461b5d30576f99ddc0521a35723c34cad816",
-  "https://github.com/shader-slang/slang/releases/download/v2026.18.2/slang-2026.18.2-macos-aarch64.tar.gz": "410c0ed14e231089a58437bb0d8e00389c48e29ed9ffe23e3b04a5c74f1ce809",
-  "https://github.com/shader-slang/slang/releases/download/v2026.18.2/slang-2026.18.2-windows-x86_64.zip": "747602aec6b3623658d55fea87492d71828e15d16802d7941204fde418ceee8e",
+  "https://github.com/shader-slang/slang/releases/download/v2026.22/slang-2026.22-linux-x86_64.tar.gz": "a877b75c6ec515f5d8bf66ea4bae4f0a5ba85050b9540c2046670285808347e6",
+  "https://github.com/shader-slang/slang/releases/download/v2026.22/slang-2026.22-macos-aarch64.tar.gz": "885b5bd9a79a1ae81fdb92212f5f7c785001f870d45c39f9bb5df01339db3fea",
+  "https://github.com/shader-slang/slang/releases/download/v2026.22/slang-2026.22-windows-x86_64.zip": "dd0c4a86bd44cdb7e9cf712af0c8ebf2fff1bba19fa5e3c128ff87384e8ff17b",
   "https://github.com/uxlfoundation/oneTBB/archive/refs/tags/v2023.2.0.tar.gz": "80cb62e62defeee67ea1885a6f72d97ac81404f8fde9cded62fb51524808a30c",
   "https://github.com/wjakob/nanobind/archive/refs/tags/v3.1.0.tar.gz": "39659890a112e84e7263e4a263c71dd2621f866f7a4386ce95ef410e6c0e5c2f"
 }

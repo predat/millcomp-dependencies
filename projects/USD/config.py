@@ -2,7 +2,7 @@
  'url': 'https://openusd.org',
  'downloads': ['https://github.com/PixarAnimationStudios/OpenUSD/archive/refs/tags/v26.11.1.tar.gz'],
  'license': ['LICENSE.txt'],
- 'dependencies': ['Python', 'TBB'],
+ 'dependencies': ['Python', 'TBB', 'MaterialX'],
  'cmake': ['-DPXR_BUILD_IMAGING=OFF',
            '-DPXR_BUILD_USD_IMAGING=OFF',
            '-DPXR_BUILD_USDVIEW=OFF',
@@ -10,7 +10,7 @@
            '-DPXR_BUILD_EXAMPLES=OFF',
            '-DPXR_BUILD_TUTORIALS=OFF',
            '-DPXR_BUILD_HTML_DOCUMENTATION=OFF',
-           '-DPXR_ENABLE_MATERIALX_SUPPORT=OFF',
+           '-DPXR_ENABLE_MATERIALX_SUPPORT=ON',  # usdMtlx: USD reads .mtlx files
            '-DPXR_ENABLE_OPENVDB_SUPPORT=OFF',
            '-DPXR_ENABLE_PTEX_SUPPORT=OFF',
            '-DPXR_ENABLE_OSL_SUPPORT=OFF',

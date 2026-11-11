@@ -1,4 +1,10 @@
 // Each dependency, used once. Prints one line per dependency, stops at the first that fails.
+// Arguments: a directory to write in, the unpacked archive.
+#include <MaterialXCore/Document.h>
+#include <MaterialXFormat/Util.h>
+#include <MaterialXGenShader/GenContext.h>
+#include <MaterialXGenShader/Shader.h>
+#include <MaterialXGenSlang/SlangShaderGenerator.h>
 #include <OpenColorIO/OpenColorIO.h>
 #include <OpenImageIO/imagebuf.h>
 #include <OpenImageIO/imagebufalgo.h>
@@ -50,6 +56,20 @@ int main(int argc, char** argv)
     const auto stage = UsdStage::CreateInMemory("smoke.usda");
     const UsdPrim prim = stage->DefinePrim(SdfPath("/comp"));
     check(prim.IsValid() && SdfFileFormat::FindByExtension("usda"), "USD (its plugins found)");
+    check(SdfFileFormat::FindByExtension("mtlx") != nullptr, "USD MaterialX plugin (usdMtlx)");
+
+    // MaterialX finds its data libraries next to the executable: millComp, as this test, says where they are.
+    const MaterialX::FilePath deps(argc > 2 ? argv[2] : ".");
+    MaterialX::DocumentPtr stdlib = MaterialX::createDocument();
+    MaterialX::loadLibraries({"libraries"}, MaterialX::FileSearchPath(deps), stdlib);
+    check(!stdlib->getNodeDefs().empty(), "MaterialX (its libraries found)");
+    MaterialX::DocumentPtr materials = MaterialX::createDocument();
+    materials->importLibrary(stdlib);
+    MaterialX::NodePtr surface = materials->addNode("standard_surface", "surface", MaterialX::SURFACE_SHADER_TYPE_STRING);
+    MaterialX::GenContext context(MaterialX::SlangShaderGenerator::create());
+    context.registerSourceCodeSearchPath(deps);
+    MaterialX::ShaderPtr shader = context.getShaderGenerator().generate("surface", surface, context);
+    check(shader && !shader->getSourceCode(MaterialX::Stage::PIXEL).empty(), "MaterialX (Slang shader generated)");
 
     Slang::ComPtr<slang::IGlobalSession> session;
     check(SLANG_SUCCEEDED(slang::createGlobalSession(session.writeRef())), "Slang");
