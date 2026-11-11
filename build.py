@@ -143,9 +143,20 @@ def merge(source, destination):
 
 
 def projectFiles(name):
-    """The hashes of what a project's directory holds: config.py, and the scripts it runs."""
+    """The hashes of what a project's directory holds: config.py, and the scripts it runs. config.py's is its content's,
+    without `updates` (updates.py's) and comments: what changes no build rebuilds nothing."""
     directory = ROOT / "projects" / name
-    return {path.relative_to(directory).as_posix(): sha256(path) for path in sorted(directory.rglob("*")) if path.is_file() and "__pycache__" not in path.parts}
+    result = {}
+    for path in sorted(directory.rglob("*")):
+        if not path.is_file() or "__pycache__" in path.parts:
+            continue
+        if path == directory / "config.py":
+            project = eval(compile(path.read_text(), str(path), "eval"), {"__builtins__": {}})
+            project.pop("updates", None)
+            result["config.py"] = hashlib.sha256(json.dumps(project, sort_keys=True).encode()).hexdigest()
+        else:
+            result[path.relative_to(directory).as_posix()] = sha256(path)
+    return result
 
 
 def digests(projects, names, lock):
