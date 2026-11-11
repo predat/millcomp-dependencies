@@ -11,6 +11,7 @@
   "https://github.com/astral-sh/python-build-standalone/releases/download/20261026/cpython-3.11.18%2B20261026-aarch64-apple-darwin-install_only.tar.gz": "cba3455e18516fbe8668cff2820c9b6a53447c552d612443c2b2fb60d390a908",
   "https://github.com/astral-sh/python-build-standalone/releases/download/20261026/cpython-3.11.18%2B20261026-x86_64-pc-windows-msvc-install_only.tar.gz": "75cb501dc11c7b55c6b447c58e4910bce5b1f609f1017328b4f3a858dfaf5428",
   "https://github.com/astral-sh/python-build-standalone/releases/download/20261026/cpython-3.11.18%2B20261026-x86_64-unknown-linux-gnu-install_only.tar.gz": "a87ee63646c8f8438b7af3954b2135ed2af91d033c631f12a8f20af903046d06",
+  "https://github.com/facebook/zstd/releases/download/v1.5.7/zstd-1.5.7.tar.gz": "eb33e51f49a15e023950cd7825ca74a4a2b43db8354825ac24fc1b7ee09e6fa3",
   "https://github.com/fmtlib/fmt/archive/refs/tags/12.1.0.tar.gz": "ea7de4299689e12b6dddd392f9896f08fb0777ac7168897a244a6d6085043fea",
   "https://github.com/freetype/freetype/archive/refs/tags/VER-2-14-1.tar.gz": "44bd69d1f0750603410cfd4f26f1c5523c5a3a087a2dfa8639b757dc7c6677be",
   "https://github.com/google/googletest/archive/refs/tags/v1.18.0.tar.gz": "6e3191c1455468b3fc35a417fb565c1c5071aee1b7e7f85e30cf48a98d37d8b5",

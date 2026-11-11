@@ -48,7 +48,7 @@ def loadProjects():
         project = eval(compile(config.read_text(), str(config), "eval"), {"__builtins__": {}})
         projects[config.parent.name] = project
     for name, project in projects.items():
-        for dependency in project.get("dependencies", []):
+        for dependency in [d for platform in PLATFORMS for d in field(project, "dependencies", platform)]:
             if dependency not in projects:
                 sys.exit(f"{name}: unknown dependency {dependency}")
     return projects
@@ -64,7 +64,7 @@ def ordered(projects, wanted):
         if name in visiting:
             sys.exit(f"cycle through {name}")
         visiting.add(name)
-        for dependency in projects[name].get("dependencies", []):
+        for dependency in field(projects[name], "dependencies"):
             visit(dependency)
         result.append(name)
 
@@ -156,7 +156,7 @@ def digests(projects, names, lock):
             "driver": DRIVER_REVISION,
             "files": projectFiles(name),
             "sources": {url: lockEntry(lock, url) for url in field(project, "downloads")},
-            "dependencies": {dependency: result[dependency] for dependency in project.get("dependencies", [])},
+            "dependencies": {dependency: result[dependency] for dependency in field(project, "dependencies")},
         }
         result[name] = hashlib.sha256(json.dumps(content, sort_keys=True).encode()).hexdigest()
     return result
