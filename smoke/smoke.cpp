@@ -4,7 +4,9 @@
 #include <OpenImageIO/imagebufalgo.h>
 #include <QGuiApplication>
 #include <rhi/qshaderbaker.h>
+#include <pxr/usd/sdf/fileFormat.h>
 #include <pxr/usd/sdf/layer.h>
+#include <pxr/usd/usd/prim.h>
 #include <pxr/usd/usd/stage.h>
 #include <slang-com-ptr.h>
 #include <slang.h>
