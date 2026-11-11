@@ -61,7 +61,11 @@ int main(int argc, char** argv)
     QGuiApplication application(argc, argv);
     QShaderBaker baker;
     baker.setGeneratedShaders({{QShader::SpirvShader, QShaderVersion(100)}});
+    baker.setGeneratedShaderVariants({QShader::StandardShader}); // None by default: bake() would make nothing.
     baker.setSourceString("#version 440\nlayout(location = 0) out vec4 c;\nvoid main() { c = vec4(1.0); }\n", QShader::FragmentStage);
-    check(baker.bake().isValid(), "Qt (offscreen, ShaderTools)");
+    const bool baked = baker.bake().isValid();
+    if (!baked)
+        std::printf("%s\n", qPrintable(baker.errorMessage()));
+    check(baked, "Qt (offscreen, ShaderTools)");
     return 0;
 }

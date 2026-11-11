@@ -71,8 +71,9 @@ def main():
             wanted = get(url + ".sha256").split()[0].decode()
             if hashlib.sha256(file.read_bytes()).hexdigest() != wanted:
                 sys.exit(f"{url}: does not match its .sha256")
+            # Qt's archives hold bin/, lib/, include/...; ICU's holds its libraries alone, which go next to Qt's.
             with py7zr.SevenZipFile(file) as data:
-                data.extractall(out)  # flat: bin/, lib/, include/...
+                data.extractall(out / "lib" if archive.startswith("icu-") else out)
             file.unlink()
 
 
