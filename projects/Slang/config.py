@@ -6,4 +6,5 @@
  'extractTo': '{buildDir}',
  'license': ['LICENSE'],
  # 2026.18's macOS release linked Homebrew's zstd; macos.py stops the build if a release links Homebrew again.
+ 'dependencies:macos': ['Python'],  # macos.py runs with the archive's Python
  'commands:macos': [['{python}', '{projectDir}/macos.py', '--prefix', '{buildDir}']]}
