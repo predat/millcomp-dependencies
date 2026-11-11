@@ -7,6 +7,7 @@
   "https://github.com/KhronosGroup/Vulkan-Loader/archive/refs/tags/v1.4.363.tar.gz": "cc520304a4d8de9a6a1699553d6090aef0c25f87ef6cbc16b7c84ebd99093264",
   "https://github.com/PixarAnimationStudios/OpenUSD/archive/refs/tags/v26.11.1.tar.gz": "7670896e224ba18cd3cdb7cb58c149eea71af0d83c1120bc7040c1e581c1a559",
   "https://github.com/Tessil/robin-map/archive/refs/tags/v1.4.0.tar.gz": "7930dbf9634acfc02686d87f615c0f4f33135948130b8922331c16d90a03250c",
+  "https://github.com/astral-sh/python-build-standalone/releases/download/20261026/cpython-3.11.18%2B20261026-aarch64-apple-darwin-install_only.tar.gz": "cba3455e18516fbe8668cff2820c9b6a53447c552d612443c2b2fb60d390a908",
   "https://github.com/astral-sh/python-build-standalone/releases/download/20261026/cpython-3.11.18%2B20261026-x86_64-pc-windows-msvc-install_only.tar.gz": "75cb501dc11c7b55c6b447c58e4910bce5b1f609f1017328b4f3a858dfaf5428",
   "https://github.com/astral-sh/python-build-standalone/releases/download/20261026/cpython-3.11.18%2B20261026-x86_64-unknown-linux-gnu-install_only.tar.gz": "a87ee63646c8f8438b7af3954b2135ed2af91d033c631f12a8f20af903046d06",
   "https://github.com/fmtlib/fmt/archive/refs/tags/12.1.0.tar.gz": "ea7de4299689e12b6dddd392f9896f08fb0777ac7168897a244a6d6085043fea",
@@ -17,6 +18,7 @@
   "https://github.com/madler/zlib/archive/refs/tags/v1.3.1.tar.gz": "17e88863f3600672ab49182f217281b6fc4d3c762bde361935e436a95214d05c",
   "https://github.com/pnggroup/libpng/archive/refs/tags/v1.6.50.tar.gz": "71158e53cfdf2877bc99bcab33641d78df3f48e6e0daad030afe9cb8c031aa46",
   "https://github.com/shader-slang/slang/releases/download/v2026.18.2/slang-2026.18.2-linux-x86_64.tar.gz": "8a097d4365e1cab10265d0b0d77b461b5d30576f99ddc0521a35723c34cad816",
+  "https://github.com/shader-slang/slang/releases/download/v2026.18.2/slang-2026.18.2-macos-aarch64.tar.gz": "410c0ed14e231089a58437bb0d8e00389c48e29ed9ffe23e3b04a5c74f1ce809",
   "https://github.com/shader-slang/slang/releases/download/v2026.18.2/slang-2026.18.2-windows-x86_64.zip": "747602aec6b3623658d55fea87492d71828e15d16802d7941204fde418ceee8e",
   "https://github.com/uxlfoundation/oneTBB/archive/refs/tags/v2023.2.0.tar.gz": "80cb62e62defeee67ea1885a6f72d97ac81404f8fde9cded62fb51524808a30c",
   "https://github.com/wjakob/nanobind/archive/refs/tags/v3.1.0.tar.gz": "39659890a112e84e7263e4a263c71dd2621f866f7a4386ce95ef410e6c0e5c2f"

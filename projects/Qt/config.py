@@ -25,4 +25,12 @@
                        '--version',
                        '6.12.0',
                        '--out',
-                       '{buildDir}/qt']]}
+                       '{buildDir}/qt']],
+ 'commands:macos': [['{python}',
+                     '{projectDir}/fetch.py',
+                     '--platform',
+                     'macos',
+                     '--version',
+                     '6.12.0',
+                     '--out',
+                     '{buildDir}/qt']]}

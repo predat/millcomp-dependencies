@@ -30,6 +30,8 @@ def archivesOf(platform, version):
     compact = version.replace(".", "")
     if platform == "windows":
         arch, base = "win64_msvc2022_64", f"{REPOSITORY}/windows_x86/desktop/qt6_{compact}/qt6_{compact}_msvc2022_64"
+    elif platform == "macos":  # universal (x86_64 and arm64), frameworks; Qt uses the system's ICU there
+        arch, base = "clang_64", f"{REPOSITORY}/mac_x64/desktop/qt6_{compact}/qt6_{compact}"
     else:
         arch, base = "linux_gcc_64", f"{REPOSITORY}/linux_x64/desktop/qt6_{compact}/qt6_{compact}"
     packages = {f"qt.qt6.{compact}.{arch}", f"qt.qt6.{compact}.addons.qtshadertools.{arch}"}
@@ -53,7 +55,7 @@ def archivesOf(platform, version):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--platform", choices=["linux", "windows"], required=True)
+    parser.add_argument("--platform", choices=["linux", "windows", "macos"], required=True)
     parser.add_argument("--version", required=True)
     parser.add_argument("--out", required=True)
     arguments = parser.parse_args()

@@ -20,6 +20,8 @@ jobs:
             platform: linux
           - os: windows-2025
             platform: windows
+          - os: macos-15
+            platform: macos
     runs-on: ${{ matrix.os }}
     # GitHub's limit is 360. The cache saved below lets a rerun go on with what was built.
     timeout-minutes: 350

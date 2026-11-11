@@ -19,7 +19,7 @@
            '-DPXR_ENABLE_PYTHON_SUPPORT=ON',
            '-DPXR_USE_DEBUG_PYTHON=OFF',
            '-DPXR_BUILD_MONOLITHIC=OFF',
-           # The same on both platforms, where millComp looks: lib/python/pxr. USD's default is Python's
-           # site-packages, which differs between them.
+           # The same on every platform, where millComp looks: lib/python/pxr. USD's default is Python's
+           # site-packages, which differs between platforms.
            '-DPXR_PYTHON_INSTALL_DIR=lib/python',
            '-DPXR_INSTALL_LOCATION=../plugin/usd']}

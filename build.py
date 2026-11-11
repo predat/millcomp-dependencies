@@ -23,7 +23,8 @@ import zipfile
 ROOT = pathlib.Path(__file__).resolve().parent
 VERSION = (ROOT / "VERSION").read_text().strip()
 LOCK = ROOT / "lock.json"
-PLATFORM = "windows" if sys.platform == "win32" else "linux" if sys.platform.startswith("linux") else None
+PLATFORMS = ("linux", "windows", "macos")
+PLATFORM = {"win32": "windows", "darwin": "macos"}.get(sys.platform, "linux" if sys.platform.startswith("linux") else None)
 # Bump to rebuild everything: what build.py passes to every project changed.
 DRIVER_REVISION = 1
 
@@ -33,6 +34,12 @@ EXCLUDED = [".stamps", ".stamps/*", "share/doc/*", "share/man/*", "doc/*", "man/
 # What a Linux library of the archive may need from the system: the C and C++ runtimes, and X11, which Qt needs too
 # (Slang's libgfx links it). Qt's own libraries are not checked (they need X11, xcb, GL, as any Qt application does).
 SYSTEM_LIBRARIES = ["ld-linux*", "libc.so*", "libm.so*", "libdl.so*", "libpthread.so*", "librt.so*", "libutil.so*", "libstdc++.so*", "libgcc_s.so*", "libX11.so*"]
+# macOS: what a library of the archive may need from the system, and what it targets. Qt 6.12's binaries need 14.4.
+MACOS_SYSTEM_PREFIXES = ("/usr/lib/", "/System/Library/")
+MACOS_DEPLOYMENT_TARGET = "14.4"
+MACOS_ARCHITECTURE = "arm64"
+# Homebrew's prefixes, which the runners fill: nothing of the archive may come from there.
+MACOS_IGNORED_PREFIXES = "/opt/homebrew;/usr/local"
 
 
 def loadProjects():
@@ -186,10 +193,14 @@ def buildProject(name, project, buildDir, workDir, archives, lock, jobs):
     else:
         environment["PATH"] = os.pathsep.join([str(buildDir / "bin"), str(buildDir / "python/bin"), environment["PATH"]])
         environment["LD_LIBRARY_PATH"] = os.pathsep.join([str(buildDir / "lib"), environment.get("LD_LIBRARY_PATH", "")])
+    if PLATFORM == "macos":
+        environment["MACOSX_DEPLOYMENT_TARGET"] = MACOS_DEPLOYMENT_TARGET
+        # pkg-config finds the archive's packages only, not Homebrew's.
+        environment["PKG_CONFIG_LIBDIR"] = os.pathsep.join([str(buildDir / "lib/pkgconfig"), str(buildDir / "share/pkgconfig")])
     for key, value in project.get("environment", {}).items():
         environment[key] = substitute(value, variables)
 
-    if "cmake" in project or "cmake:windows" in project or "cmake:linux" in project:
+    if any(key == "cmake" or key.startswith("cmake:") for key in project):
         cmakeSource = source / project.get("cmakeSource", ".")
         arguments = [
             "cmake",
@@ -210,6 +221,15 @@ def buildProject(name, project, buildDir, workDir, archives, lock, jobs):
         ]
         if PLATFORM == "linux":
             arguments += ["-DCMAKE_INSTALL_RPATH=$ORIGIN/../lib", "-DCMAKE_C_FLAGS=-fPIC", "-DCMAKE_CXX_FLAGS=-fPIC"]
+        elif PLATFORM == "macos":
+            arguments += [
+                "-DCMAKE_INSTALL_RPATH=@loader_path/../lib",
+                "-DCMAKE_INSTALL_NAME_DIR=@rpath",
+                f"-DCMAKE_OSX_DEPLOYMENT_TARGET={MACOS_DEPLOYMENT_TARGET}",
+                f"-DCMAKE_OSX_ARCHITECTURES={MACOS_ARCHITECTURE}",
+                f"-DCMAKE_IGNORE_PREFIX_PATH={MACOS_IGNORED_PREFIXES}",
+                "-DCMAKE_FIND_FRAMEWORK=LAST",
+            ]
         arguments += [substitute(argument, variables) for argument in field(project, "cmake")]
         run(arguments, work, environment)
         run(["cmake", "--build", work / "build", "-j", jobs], work, environment)
@@ -274,6 +294,36 @@ def auditLinux(buildDir):
     print(f"audit: {len(files)} files, nothing from the build machine")
 
 
+def auditMacos(buildDir):
+    """auditLinux's macOS twin: fails on a library that needs something neither in the archive nor in the system (one
+    of Homebrew's, or one with its absolute build path as install name)."""
+    shipped, files, failures = set(), [], []
+    for path in buildDir.rglob("*"):
+        if not path.is_file():  # a broken symlink, a directory
+            continue
+        if path.suffix in (".dylib", ".so") or path.parent == buildDir / "bin" or ".framework/" in path.as_posix():
+            shipped.add(path.name)
+            if path.suffix in (".dylib", ".so") or path.parent == buildDir / "bin":
+                if "/qt/" not in path.as_posix() and "/python/" not in path.as_posix() and not path.is_symlink():
+                    files.append(path)
+    for file in files:
+        result = subprocess.run(["otool", "-L", str(file)], capture_output=True, text=True)
+        if result.returncode != 0 or "is not an object file" in result.stdout:
+            continue  # a script in bin/
+        for line in result.stdout.splitlines()[1:]:
+            if line.rstrip().endswith(":"):
+                continue  # "(architecture arm64):" of a universal file
+            needed = line.strip().split(" (compatibility")[0]
+            if needed.startswith(MACOS_SYSTEM_PREFIXES):
+                continue
+            if needed.startswith(("@rpath/", "@loader_path/", "@executable_path/")) and pathlib.PurePosixPath(needed).name in shipped:
+                continue
+            failures.append(f"{file.relative_to(buildDir)} needs {needed}")
+    if failures:
+        sys.exit("libraries found on the build machine:\n  " + "\n  ".join(sorted(set(failures))))
+    print(f"audit: {len(files)} files, nothing from the build machine")
+
+
 def relocate(buildDir):
     """Makes the CMake and pkg-config files relative to where they are: some record the install prefix as an absolute
     path (pxrConfig.cmake records Python's), which exists on the build machine only. Running it again changes nothing."""
@@ -328,7 +378,7 @@ def updateLock(projects, archives):
     lock = json.loads(LOCK.read_text()) if LOCK.exists() else {}
     wanted = set()
     for project in projects.values():
-        for platform in ("linux", "windows"):
+        for platform in PLATFORMS:
             wanted.update(field(project, "downloads", platform))
     for url in sorted(wanted):
         if url not in lock:
@@ -351,7 +401,7 @@ def main():
     arguments = parser.parse_args()
 
     if not PLATFORM:
-        sys.exit(f"{sys.platform}: only linux and windows are supported")
+        sys.exit(f"{sys.platform}: only {', '.join(PLATFORMS)} are supported")
     projects = loadProjects()
     archives = pathlib.Path(arguments.archives).resolve()
     if arguments.update_lock:
@@ -381,6 +431,8 @@ def main():
         writeManifest(projects, names, lock, buildDir)
         if PLATFORM == "linux":
             auditLinux(buildDir)
+        elif PLATFORM == "macos":
+            auditMacos(buildDir)
         relocate(buildDir)
         package(buildDir, pathlib.Path(arguments.output).resolve())
 
