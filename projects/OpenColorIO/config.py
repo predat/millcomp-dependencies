@@ -12,4 +12,6 @@
            '-DOCIO_BUILD_JAVA=OFF',
            '-DOCIO_USE_SIMD=ON',
            # Builds its own expat, not the build machine's.
-           '-DCMAKE_DISABLE_FIND_PACKAGE_expat=ON']}
+           '-DCMAKE_DISABLE_FIND_PACKAGE_expat=ON'],
+ # New versions, within the series (updates.py)
+ 'updates': [{'kind': 'git-tags', 'repo': 'https://github.com/AcademySoftwareFoundation/OpenColorIO', 'tag': r'v(\d+)\.(\d+)\.(\d+)', 'series': '2'}]}

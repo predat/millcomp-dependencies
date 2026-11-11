@@ -11,4 +11,6 @@
            '-DOPENEXR_BUILD_PYTHON=OFF',
            # Their vendored copies, not the build machine's.
            '-DOPENEXR_FORCE_INTERNAL_ZSTD=ON',
-           '-DOPENEXR_FORCE_INTERNAL_DEFLATE=ON']}
+           '-DOPENEXR_FORCE_INTERNAL_DEFLATE=ON'],
+ # New versions, within the series (updates.py)
+ 'updates': [{'kind': 'git-tags', 'repo': 'https://github.com/AcademySoftwareFoundation/openexr', 'tag': r'v(\d+)\.(\d+)\.(\d+)', 'series': '3'}]}

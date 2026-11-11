@@ -7,4 +7,7 @@
  'license:linux': ['lib/python3.11/LICENSE.txt'],
  'license:windows': ['LICENSE.txt'],
  'license:macos': ['lib/python3.11/LICENSE.txt'],
- 'commands': [['{python}', '-m', 'pip', 'install', '--no-cache-dir', 'numpy==2.4.6']]}
+ 'commands': [['{python}', '-m', 'pip', 'install', '--no-cache-dir', 'numpy==2.4.6']],
+ # New versions, within the series (updates.py). millComp: python-3.11, numpy-2
+ 'updates': [{'kind': 'python-build-standalone', 'series': '3.11'},
+             {'kind': 'pypi', 'package': 'numpy', 'series': '2'}]}

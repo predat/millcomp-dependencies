@@ -13,4 +13,6 @@
            '-Djbig=OFF',
            '-Dlerc=OFF',
            '-Dlibdeflate=OFF',
-           '-Dcxx=OFF']}
+           '-Dcxx=OFF'],
+ # New versions, within the series (updates.py)
+ 'updates': [{'kind': 'git-tags', 'repo': 'https://github.com/libsdl-org/libtiff', 'tag': r'v(\d+)\.(\d+)\.(\d+)', 'series': '4'}]}

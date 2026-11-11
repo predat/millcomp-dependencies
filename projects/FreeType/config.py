@@ -7,4 +7,6 @@
            '-DFT_DISABLE_HARFBUZZ=ON',
            '-DFT_DISABLE_BROTLI=ON',
            '-DFT_REQUIRE_ZLIB=ON',
-           '-DFT_REQUIRE_PNG=ON']}
+           '-DFT_REQUIRE_PNG=ON'],
+ # New versions, within the series (updates.py)
+ 'updates': [{'kind': 'git-tags', 'repo': 'https://github.com/freetype/freetype', 'tag': r'VER-(\d+)-(\d+)-(\d+)', 'series': '2'}]}

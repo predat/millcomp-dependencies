@@ -26,4 +26,6 @@
  # python-build-standalone's macOS python3 links Python statically, though its sysconfig names libpython3.11.dylib, so
  # USD does not find out by itself: its modules linking libpython would load a second Python in the process, which
  # crashes. They resolve Python's symbols in the process instead; executables still link libpython.
- 'cmake:macos': ['-DPXR_PY_UNDEFINED_DYNAMIC_LOOKUP=ON']}
+ 'cmake:macos': ['-DPXR_PY_UNDEFINED_DYNAMIC_LOOKUP=ON'],
+ # New versions, within the series (updates.py). millComp: usd-26.11
+ 'updates': [{'kind': 'git-tags', 'repo': 'https://github.com/PixarAnimationStudios/OpenUSD', 'tag': r'v(\d+)\.(\d+)(?:\.(\d+))?', 'series': '26.11'}]}

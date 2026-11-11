@@ -33,4 +33,6 @@
                      '--version',
                      '6.12.0',
                      '--out',
-                     '{buildDir}/qt']]}
+                     '{buildDir}/qt']],
+ # New versions, within the series (updates.py). millComp: qt-6.12
+ 'updates': [{'kind': 'qt', 'series': '6.12'}]}

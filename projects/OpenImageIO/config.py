@@ -34,4 +34,6 @@
            '-DUSE_R3DSDK=OFF',
            '-DUSE_BZIP2=OFF',
            '-DUSE_QT=OFF',
-           '-DUSE_LIBUHDR=OFF']}
+           '-DUSE_LIBUHDR=OFF'],
+ # New versions, within the series (updates.py)
+ 'updates': [{'kind': 'git-tags', 'repo': 'https://github.com/AcademySoftwareFoundation/OpenImageIO', 'tag': r'v(\d+)\.(\d+)\.(\d+)\.(\d+)', 'series': '3'}]}

@@ -7,4 +7,6 @@
  'license': ['LICENSE'],
  # 2026.18's macOS release linked Homebrew's zstd; macos.py stops the build if a release links Homebrew again.
  'dependencies:macos': ['Python'],  # macos.py runs with the archive's Python
- 'commands:macos': [['{python}', '{projectDir}/macos.py', '--prefix', '{buildDir}']]}
+ 'commands:macos': [['{python}', '{projectDir}/macos.py', '--prefix', '{buildDir}']],
+ # New versions, within the series (updates.py)
+ 'updates': [{'kind': 'git-tags', 'repo': 'https://github.com/shader-slang/slang', 'tag': r'v(\d+)\.(\d+)(?:\.(\d+))?'}]}

@@ -1,0 +1,64 @@
+name: nightly
+
+# Each night, updates.py looks for new upstream versions, within the series each project allows. When it finds
+# some, they go on the updates/nightly branch, in a pull request (opened, or refreshed), and the dependencies
+# workflow builds and tests them on every platform: its archives are the nightly builds. Nothing reaches main
+# unless the pull request is merged.
+on:
+  schedule:
+    - cron: "0 3 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+  actions: write
+
+concurrency:
+  group: nightly
+  cancel-in-progress: false
+
+jobs:
+  updates:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Look for updates
+        id: updates
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python updates.py --summary "$RUNNER_TEMP/summary.md"
+
+      - name: Pull request, build and test
+        if: steps.updates.outputs.changed == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          {
+            echo "New upstream versions, found by updates.py. The dependencies workflow builds and tests them on every"
+            echo "platform on this branch: merge when it is green, then tag to release."
+            echo
+            cat "$RUNNER_TEMP/summary.md"
+          } > "$RUNNER_TEMP/body.md"
+          cat "$RUNNER_TEMP/body.md" >> "$GITHUB_STEP_SUMMARY"
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git switch -C updates/nightly
+          git add -A
+          git commit -q -m "Update dependencies" -m "$(cat "$RUNNER_TEMP/summary.md")"
+          git push --force origin updates/nightly
+
+          if [ "$(gh pr view updates/nightly --json state --jq .state 2>/dev/null)" = OPEN ]; then
+            gh pr edit updates/nightly --body-file "$RUNNER_TEMP/body.md"
+          else
+            gh pr create --base main --head updates/nightly --title "Nightly dependency updates" --body-file "$RUNNER_TEMP/body.md"
+          fi
+
+          # A push made with this workflow's token starts no workflow; a dispatch does.
+          gh workflow run main.yml --ref updates/nightly
