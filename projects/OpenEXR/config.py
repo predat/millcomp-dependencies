@@ -8,4 +8,7 @@
            '-DOPENEXR_BUILD_EXAMPLES=OFF',
            '-DOPENEXR_INSTALL_TOOLS=OFF',
            '-DOPENEXR_INSTALL_EXAMPLES=OFF',
-           '-DOPENEXR_BUILD_PYTHON=OFF']}
+           '-DOPENEXR_BUILD_PYTHON=OFF',
+           # Their vendored copies, not the build machine's.
+           '-DOPENEXR_FORCE_INTERNAL_ZSTD=ON',
+           '-DOPENEXR_FORCE_INTERNAL_DEFLATE=ON']}

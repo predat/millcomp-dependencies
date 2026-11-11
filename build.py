@@ -30,9 +30,9 @@ DRIVER_REVISION = 1
 # Left out of the archive: not needed to build against the dependencies or to run them.
 EXCLUDED = [".stamps", ".stamps/*", "share/doc/*", "share/man/*", "doc/*", "man/*", "*/__pycache__/*", "*.pdb", "python/lib/python3.*/test/*", "python/Lib/test/*", "qt/sbom/*", "qt/doc/*"]
 
-# What a Linux library of the archive may need from the system: the C and C++ runtimes. Qt's own libraries are not
-# checked (they need X11, xcb, GL, as any Qt application does).
-SYSTEM_LIBRARIES = ["ld-linux*", "libc.so*", "libm.so*", "libdl.so*", "libpthread.so*", "librt.so*", "libutil.so*", "libstdc++.so*", "libgcc_s.so*"]
+# What a Linux library of the archive may need from the system: the C and C++ runtimes, and X11, which Qt needs too
+# (Slang's libgfx links it). Qt's own libraries are not checked (they need X11, xcb, GL, as any Qt application does).
+SYSTEM_LIBRARIES = ["ld-linux*", "libc.so*", "libm.so*", "libdl.so*", "libpthread.so*", "librt.so*", "libutil.so*", "libstdc++.so*", "libgcc_s.so*", "libX11.so*"]
 
 
 def loadProjects():

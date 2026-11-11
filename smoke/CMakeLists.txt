@@ -37,4 +37,6 @@ target_link_libraries(
         Qt6::GuiPrivate
         Qt6::ShaderToolsPrivate
 )
+# Qt's `emit` macro breaks TBB's tbb::profiling event::emit().
+target_compile_definitions(smoke PRIVATE QT_NO_EMIT)
 nanobind_add_module(_smoke NB_STATIC module.cpp)
