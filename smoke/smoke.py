@@ -37,6 +37,9 @@ def main():
         environment.pop("PYTHONPATH", None)
         pathKeys = [deps / "bin", deps / "lib", deps / "qt/bin", deps / "python"]
         environment["PATH"] = os.pathsep.join([str(path) for path in pathKeys] + [environment["PATH"]])
+        if sys.platform == "darwin":
+            # The Vulkan loader looks for drivers in system places only: millComp points it at the archive's MoltenVK too.
+            environment["VK_DRIVER_FILES"] = str(deps / "share/vulkan/icd.d/MoltenVK_icd.json")
         if not windows:
             environment["LD_LIBRARY_PATH"] = os.pathsep.join(str(path) for path in [deps / "lib", deps / "qt/lib", deps / "python/lib"])
         build = temporary / "build"

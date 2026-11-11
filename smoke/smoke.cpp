@@ -56,6 +56,22 @@ int main(int argc, char** argv)
 
     uint32_t version = 0;
     check(vkEnumerateInstanceVersion(&version) == VK_SUCCESS && version != 0, "Vulkan loader");
+#ifdef __APPLE__
+    // Without a driver, vkCreateInstance fails (VK_ERROR_INCOMPATIBLE_DRIVER): it succeeds once the loader has loaded
+    // MoltenVK through VK_DRIVER_FILES. MoltenVK is a portability driver, which the loader lists only when asked to. The
+    // runner may have no GPU Metal sees: the count is printed, not checked.
+    const char* extensions[] = {VK_KHR_PORTABILITY_ENUMERATION_EXTENSION_NAME};
+    VkInstanceCreateInfo instanceInfo{VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO};
+    instanceInfo.flags = VK_INSTANCE_CREATE_ENUMERATE_PORTABILITY_BIT_KHR;
+    instanceInfo.enabledExtensionCount = 1;
+    instanceInfo.ppEnabledExtensionNames = extensions;
+    VkInstance instance = VK_NULL_HANDLE;
+    check(vkCreateInstance(&instanceInfo, nullptr, &instance) == VK_SUCCESS, "MoltenVK (loaded by the Vulkan loader)");
+    uint32_t devices = 0;
+    vkEnumeratePhysicalDevices(instance, &devices, nullptr);
+    std::printf("MoltenVK: %u GPU(s)\n", devices);
+    vkDestroyInstance(instance, nullptr);
+#endif
 
     qputenv("QT_QPA_PLATFORM", "offscreen");
     QGuiApplication application(argc, argv);

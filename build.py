@@ -123,15 +123,23 @@ def extract(archive, destination):
     entries = list(temporary.iterdir())
     source = entries[0] if len(entries) == 1 and entries[0].is_dir() else temporary
     destination.mkdir(parents=True, exist_ok=True)
+    merge(source, destination)
+    shutil.rmtree(temporary)
+
+
+def merge(source, destination):
+    """Moves what `source` holds into `destination`, replacing what is there: a project rebuilt over its previous
+    install (python/bin/pydoc3, a symlink, already there)."""
     for entry in source.iterdir():
         target = destination / entry.name
-        if target.is_dir() and entry.is_dir():
-            shutil.copytree(entry, target, dirs_exist_ok=True, symlinks=True)
-        else:
-            if target.exists() or target.is_symlink():
-                target.unlink()
-            shutil.move(str(entry), str(target))
-    shutil.rmtree(temporary)
+        if entry.is_dir() and not entry.is_symlink() and target.is_dir() and not target.is_symlink():
+            merge(entry, target)
+            continue
+        if target.is_symlink() or target.is_file():
+            target.unlink()
+        elif target.is_dir():
+            shutil.rmtree(target)
+        shutil.move(str(entry), str(target))
 
 
 def projectFiles(name):
