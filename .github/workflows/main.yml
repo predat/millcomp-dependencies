@@ -27,7 +27,8 @@ jobs:
             cache: v2
           - os: macos-15
             platform: macos
-            cache: v2
+            # v3: drops licenses/Slang/LICENSES/Slang/... left in v2 by the moves that recursed on a case-insensitive disk.
+            cache: v3
     runs-on: ${{ matrix.os }}
     container: ${{ matrix.container || '' }}
     # GitHub's limit is 360. The cache saved below lets a rerun go on with what was built.
