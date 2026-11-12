@@ -10,16 +10,10 @@
     'downloads:macos': [
         'https://github.com/shader-slang/slang/releases/download/v2026.22/slang-2026.22-macos-aarch64.tar.gz'
     ],
-    'extractTo': '{buildDir}',
-    # The release's top files, at the archive's top once extracted: its licences with the others, its README with docs.
-    'moves': [
-        ['{buildDir}/LICENSE', '{buildDir}/licenses/Slang/LICENSE'],
-        ['{buildDir}/LICENSES', '{buildDir}/licenses/Slang/LICENSES'],
-        ['{buildDir}/third-party-notices', '{buildDir}/licenses/Slang/third-party-notices'],
-        ['{buildDir}/README.md', '{buildDir}/share/doc/slang/README.md'],
-    ],
+    # install.py copies it into the prefix, licences in licenses/Slang (not extracted there: see install.py).
+    'dependencies': ['Python'],
+    'commands': [['{python}', '{projectDir}/install.py', '--source', '{source}', '--prefix', '{buildDir}']],
     # 2026.18's macOS release linked Homebrew's zstd; macos.py stops the build if a release links Homebrew again.
-    'dependencies:macos': ['Python'],  # macos.py runs with the archive's Python
     'commands:macos': [['{python}', '{projectDir}/macos.py', '--prefix', '{buildDir}']],
     # New versions, within the series (updates.py)
     'updates': [
