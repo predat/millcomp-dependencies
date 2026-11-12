@@ -47,7 +47,8 @@ jobs:
             mesa-libGL-devel mesa-libEGL-devel libX11-devel libxkbcommon-devel libxcb xcb-util-cursor \
             glib2 fontconfig dbus-libs
           ln -sf /usr/bin/python3.12 /usr/local/bin/python
-          echo "/opt/rh/gcc-toolset-14/root/usr/bin" >> "$GITHUB_PATH"
+          # The whole PATH: in a container whose image sets none, GITHUB_PATH would leave only what it adds.
+          echo "PATH=/opt/rh/gcc-toolset-14/root/usr/bin:$PATH" >> "$GITHUB_ENV"
           echo "CC=gcc" >> "$GITHUB_ENV"
           echo "CXX=g++" >> "$GITHUB_ENV"
 
