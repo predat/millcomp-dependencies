@@ -1,6 +1,6 @@
-{'version': '2.14.1',
+{'version': '2.15.0',
  'url': 'https://freetype.org',
- 'downloads': ['https://github.com/freetype/freetype/archive/refs/tags/VER-2-14-1.tar.gz'],
+ 'downloads': ['https://github.com/freetype/freetype/archive/refs/tags/VER-2-15-0.tar.gz'],
  'license': ['LICENSE.TXT'],
  'dependencies': ['ZLib', 'LibPNG'],
  'cmake': ['-DFT_DISABLE_BZIP2=ON',

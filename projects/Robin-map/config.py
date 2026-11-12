@@ -1,6 +1,6 @@
-{'version': '1.4.0',
+{'version': '1.4.1',
  'url': 'https://github.com/Tessil/robin-map',
- 'downloads': ['https://github.com/Tessil/robin-map/archive/refs/tags/v1.4.0.tar.gz'],
+ 'downloads': ['https://github.com/Tessil/robin-map/archive/refs/tags/v1.4.1.tar.gz'],
  'license': ['LICENSE'],
  'cmake': [],
  # New versions, within the series (updates.py)
