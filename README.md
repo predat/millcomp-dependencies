@@ -5,7 +5,7 @@ The approach is the same as [GafferHQ/dependencies](https://github.com/GafferHQ/
 
 | Platform | Archive | Built on |
 |---|---|---|
-| Linux x86_64 | `millcompDependencies-<version>-linux.tar.gz` | Ubuntu 24.04, gcc 14 |
+| Linux x86_64 | `millcompDependencies-<version>-linux.tar.gz` | Rocky Linux 9 (glibc 2.34), gcc-toolset-14 |
 | Windows x64 | `millcompDependencies-<version>-windows.zip` | Windows Server 2025, MSVC |
 | macOS arm64 | `millcompDependencies-<version>-macos.tar.gz` | macOS 15, deployment target 14.4 |
 
@@ -77,7 +77,8 @@ A few points need care in millComp itself:
 ## Building
 
 The requirements are Python 3.10 or later, CMake, Ninja, Meson, pkg-config and a C++ compiler:
-- **Linux**: gcc 14, plus the headers `libgl-dev`, `libegl-dev`, `libx11-dev` and `libxkbcommon-dev`, and `nasm`.
+- **Linux**: Rocky Linux 9 or another glibc 2.34 distribution, so that the archive runs on it and above; gcc-toolset-14,
+  the headers `mesa-libGL-devel`, `mesa-libEGL-devel`, `libX11-devel` and `libxkbcommon-devel`, and `nasm`.
 - **Windows**: Visual Studio with the C++ tools, run from a developer command prompt; `nasm` on `PATH`; MSYS2 in
   `C:\msys64` (or `MSYS2_ROOT`) with `make`, `diffutils` and `mingw-w64-x86_64-pkgconf`, where FFmpeg's configure runs.
 - **macOS**: Xcode.

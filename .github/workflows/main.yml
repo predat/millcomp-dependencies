@@ -16,34 +16,50 @@ jobs:
       fail-fast: false
       matrix:
         include:
+          # Rocky Linux 9, as the studio: glibc 2.34, which the archive then runs on and above. gcc-toolset-14 links the
+          # system's libstdc++ (GCC 11) and what it lacks statically: nothing to ship.
           - os: ubuntu-24.04
             platform: linux
+            container: rockylinux/rockylinux:9
+            cache: v3
           - os: windows-2025
             platform: windows
+            cache: v2
           - os: macos-15
             platform: macos
+            cache: v2
     runs-on: ${{ matrix.os }}
+    container: ${{ matrix.container || '' }}
     # GitHub's limit is 360. The cache saved below lets a rerun go on with what was built.
     timeout-minutes: 350
     env:
       WORK: ${{ matrix.platform == 'windows' && 'D:/w' || 'build/work' }}
     steps:
+      # Before the checkout, which needs git. Python 3.12 runs build.py; the rest builds or runs the archive (the smoke
+      # test's Qt needs glib, fontconfig, GL, EGL, xkbcommon).
+      - name: Linux packages
+        if: matrix.platform == 'linux'
+        run: |
+          dnf -y install dnf-plugins-core epel-release
+          dnf config-manager --set-enabled crb
+          dnf -y install git tar xz zstd gzip findutils which binutils make perl pkgconf-pkg-config nasm \
+            gcc-toolset-14-gcc gcc-toolset-14-gcc-c++ gcc-toolset-14-binutils python3.12 python3.12-pip \
+            mesa-libGL-devel mesa-libEGL-devel libX11-devel libxkbcommon-devel libxcb xcb-util-cursor \
+            glib2 fontconfig dbus-libs
+          ln -sf /usr/bin/python3.12 /usr/local/bin/python
+          echo "/opt/rh/gcc-toolset-14/root/usr/bin" >> "$GITHUB_PATH"
+          echo "CC=gcc" >> "$GITHUB_ENV"
+          echo "CXX=g++" >> "$GITHUB_ENV"
+
       - uses: actions/checkout@v7
 
       - uses: actions/setup-python@v7
+        if: matrix.platform != 'linux'
         with:
           python-version: "3.12"
 
       - name: Tools
         run: python -m pip install cmake==4.3.2 ninja==1.13.0 meson==1.12.1
-
-      - name: Linux packages
-        if: matrix.platform == 'linux'
-        run: |
-          sudo apt-get -o Acquire::Retries=5 update
-          sudo apt-get -o Acquire::Retries=5 install -y g++-14 libgl-dev libegl-dev libx11-dev libxkbcommon-dev libxcb-cursor0 nasm
-          echo "CC=gcc-14" >> "$GITHUB_ENV"
-          echo "CXX=g++-14" >> "$GITHUB_ENV"
 
       # FFmpeg's configure and make run in MSYS2's shell (the runner has MSYS2); nasm assembles dav1d's, SVT-AV1's and
       # FFmpeg's x86 code.
@@ -69,13 +85,14 @@ jobs:
             if ($_ -match '^([^=]+)=(.*)$' -and $before[$matches[1]] -ne $matches[2]) { "$($matches[1])=$($matches[2])" }
           } | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
 
-      # v2: build.py records what each project installs since; caches without the records start again.
+      # v2: build.py records what each project installs since; caches without the records start again. v3 (Linux):
+      # built on Rocky Linux 9.
       - name: Restore what was built
         uses: actions/cache/restore@v6
         with:
           path: build/install
-          key: deps-v2-${{ matrix.platform }}-${{ hashFiles('build.py', 'lock.json', 'projects/**') }}-${{ github.run_id }}
-          restore-keys: deps-v2-${{ matrix.platform }}-
+          key: deps-${{ matrix.cache }}-${{ matrix.platform }}-${{ hashFiles('build.py', 'lock.json', 'projects/**') }}-${{ github.run_id }}
+          restore-keys: deps-${{ matrix.cache }}-${{ matrix.platform }}-
 
       - name: Build and pack
         run: python build.py --work-dir ${{ env.WORK }} --package
@@ -85,7 +102,7 @@ jobs:
         uses: actions/cache/save@v6
         with:
           path: build/install
-          key: deps-v2-${{ matrix.platform }}-${{ hashFiles('build.py', 'lock.json', 'projects/**') }}-${{ github.run_id }}-${{ github.run_attempt }}
+          key: deps-${{ matrix.cache }}-${{ matrix.platform }}-${{ hashFiles('build.py', 'lock.json', 'projects/**') }}-${{ github.run_id }}-${{ github.run_attempt }}
 
       - name: Archive complete and relocatable
         shell: bash

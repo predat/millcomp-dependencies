@@ -66,8 +66,9 @@ proves the archive is complete and relocatable.
 
 ## CI (`.github/workflows/`)
 
-- **`main.yml`** runs on pushes to `main` and on `v*` tags. It is a matrix over ubuntu-24.04, windows-2025 and
-  macos-15. Each job restores `build/install` from the cache (key prefix `deps-v2-<platform>-`, bump it to start
+- **`main.yml`** runs on pushes to `main` and on `v*` tags. It is a matrix over Linux (a `rockylinux/rockylinux:9`
+  container with gcc-toolset-14, on ubuntu-24.04), windows-2025 and macos-15. Each job restores `build/install` from the
+  cache (key prefix `deps-<matrix.cache>-<platform>-`, bump the platform's `cache` to start
   fresh), builds with `--package`, runs the smoke test and uploads the archive. On a `v*` tag, a release job publishes
   the three archives. `VERSION` holds the release number, and the tag must match it.
 - **`nightly.yml`** runs daily at 03:00 UTC. It runs `updates.py` and force-pushes the changes to `updates/nightly`. It
