@@ -24,16 +24,42 @@ ROOT = pathlib.Path(__file__).resolve().parent
 VERSION = (ROOT / "VERSION").read_text().strip()
 LOCK = ROOT / "lock.json"
 PLATFORMS = ("linux", "windows", "macos")
-PLATFORM = {"win32": "windows", "darwin": "macos"}.get(sys.platform, "linux" if sys.platform.startswith("linux") else None)
+PLATFORM = {"win32": "windows", "darwin": "macos"}.get(
+    sys.platform, "linux" if sys.platform.startswith("linux") else None
+)
 # Bump to rebuild everything: what build.py passes to every project changed.
 DRIVER_REVISION = 1
 
 # Left out of the archive: not needed to build against the dependencies or to run them.
-EXCLUDED = [".stamps", ".stamps/*", "share/doc/*", "share/man/*", "doc/*", "man/*", "*/__pycache__/*", "*.pdb", "python/lib/python3.*/test/*", "python/Lib/test/*", "qt/sbom/*", "qt/doc/*"]
+EXCLUDED = [
+    ".stamps",
+    ".stamps/*",
+    "share/doc/*",
+    "share/man/*",
+    "doc/*",
+    "man/*",
+    "*/__pycache__/*",
+    "*.pdb",
+    "python/lib/python3.*/test/*",
+    "python/Lib/test/*",
+    "qt/sbom/*",
+    "qt/doc/*",
+]
 
 # What a Linux library of the archive may need from the system: the C and C++ runtimes, and X11, which Qt needs too
 # (Slang's libgfx links it). Qt's own libraries are not checked (they need X11, xcb, GL, as any Qt application does).
-SYSTEM_LIBRARIES = ["ld-linux*", "libc.so*", "libm.so*", "libdl.so*", "libpthread.so*", "librt.so*", "libutil.so*", "libstdc++.so*", "libgcc_s.so*", "libX11.so*"]
+SYSTEM_LIBRARIES = [
+    "ld-linux*",
+    "libc.so*",
+    "libm.so*",
+    "libdl.so*",
+    "libpthread.so*",
+    "librt.so*",
+    "libutil.so*",
+    "libstdc++.so*",
+    "libgcc_s.so*",
+    "libX11.so*",
+]
 # macOS: what a library of the archive may need from the system, and what it targets. Qt 6.12's binaries need 14.4.
 MACOS_SYSTEM_PREFIXES = ("/usr/lib/", "/System/Library/")
 MACOS_DEPLOYMENT_TARGET = "14.4"
@@ -208,14 +234,22 @@ def buildProject(name, project, buildDir, workDir, archives, lock, jobs):
     environment = dict(os.environ)
     environment["CMAKE_PREFIX_PATH"] = buildDir.as_posix()
     if PLATFORM == "windows":
-        environment["PATH"] = os.pathsep.join([str(buildDir / "bin"), str(buildDir / "lib"), str(buildDir / "python"), environment["PATH"]])
+        environment["PATH"] = os.pathsep.join(
+            [str(buildDir / "bin"), str(buildDir / "lib"), str(buildDir / "python"), environment["PATH"]]
+        )
     else:
-        environment["PATH"] = os.pathsep.join([str(buildDir / "bin"), str(buildDir / "python/bin"), environment["PATH"]])
-        environment["LD_LIBRARY_PATH"] = os.pathsep.join([str(buildDir / "lib"), environment.get("LD_LIBRARY_PATH", "")])
+        environment["PATH"] = os.pathsep.join(
+            [str(buildDir / "bin"), str(buildDir / "python/bin"), environment["PATH"]]
+        )
+        environment["LD_LIBRARY_PATH"] = os.pathsep.join(
+            [str(buildDir / "lib"), environment.get("LD_LIBRARY_PATH", "")]
+        )
     if PLATFORM == "macos":
         environment["MACOSX_DEPLOYMENT_TARGET"] = MACOS_DEPLOYMENT_TARGET
         # pkg-config finds the archive's packages only, not Homebrew's.
-        environment["PKG_CONFIG_LIBDIR"] = os.pathsep.join([str(buildDir / "lib/pkgconfig"), str(buildDir / "share/pkgconfig")])
+        environment["PKG_CONFIG_LIBDIR"] = os.pathsep.join(
+            [str(buildDir / "lib/pkgconfig"), str(buildDir / "share/pkgconfig")]
+        )
     for key, value in project.get("environment", {}).items():
         environment[key] = substitute(value, variables)
 
@@ -223,9 +257,12 @@ def buildProject(name, project, buildDir, workDir, archives, lock, jobs):
         cmakeSource = source / project.get("cmakeSource", ".")
         arguments = [
             "cmake",
-            "-S", cmakeSource,
-            "-B", work / "build",
-            "-G", "Ninja",
+            "-S",
+            cmakeSource,
+            "-B",
+            work / "build",
+            "-G",
+            "Ninja",
             "-Wno-dev",
             "-DCMAKE_BUILD_TYPE=Release",
             f"-DCMAKE_INSTALL_PREFIX={variables['buildDir']}",
@@ -276,7 +313,11 @@ def buildProject(name, project, buildDir, workDir, archives, lock, jobs):
 
 def installed(buildDir):
     """What the install prefix holds, files and symlinks, but .stamps."""
-    return {path.relative_to(buildDir).as_posix() for path in buildDir.rglob("*") if (path.is_file() or path.is_symlink()) and path.relative_to(buildDir).parts[0] != ".stamps"}
+    return {
+        path.relative_to(buildDir).as_posix()
+        for path in buildDir.rglob("*")
+        if (path.is_file() or path.is_symlink()) and path.relative_to(buildDir).parts[0] != ".stamps"
+    }
 
 
 def uninstall(buildDir, name):
@@ -292,7 +333,12 @@ def uninstall(buildDir, name):
             path.unlink()
             directories.update(path.parents)
     for directory in sorted(directories, key=lambda path: len(path.parts), reverse=True):
-        if directory != buildDir and buildDir in directory.parents and directory.is_dir() and not any(directory.iterdir()):
+        if (
+            directory != buildDir
+            and buildDir in directory.parents
+            and directory.is_dir()
+            and not any(directory.iterdir())
+        ):
             directory.rmdir()
     record.unlink()
 
@@ -358,7 +404,10 @@ def auditMacos(buildDir):
             needed = line.strip().split(" (compatibility")[0]
             if needed.startswith(MACOS_SYSTEM_PREFIXES):
                 continue
-            if needed.startswith(("@rpath/", "@loader_path/", "@executable_path/")) and pathlib.PurePosixPath(needed).name in shipped:
+            if (
+                needed.startswith(("@rpath/", "@loader_path/", "@executable_path/"))
+                and pathlib.PurePosixPath(needed).name in shipped
+            ):
                 continue
             failures.append(f"{file.relative_to(buildDir)} needs {needed}")
     if failures:
@@ -383,7 +432,11 @@ def relocate(buildDir):
         else:
             here = f"${{CMAKE_CURRENT_LIST_DIR}}/{relative}"
             # A bracket argument, [[...]], expands no variable: make those that hold the prefix quoted arguments.
-            text = re.sub(r"\[\[([^\]\"]*)\]\]", lambda match: f'"{match.group(1)}"' if prefix.search(match.group(1)) else match.group(0), text)
+            text = re.sub(
+                r"\[\[([^\]\"]*)\]\]",
+                lambda match: f'"{match.group(1)}"' if prefix.search(match.group(1)) else match.group(0),
+                text,
+            )
         text = prefix.sub(lambda match: here, text)
         path.write_bytes(text.encode("utf-8", "surrogateescape"))
         changed.append(path.relative_to(buildDir).as_posix())
@@ -439,7 +492,9 @@ def main():
     parser.add_argument("--output", default="build/package", help="where the archive goes")
     parser.add_argument("--jobs", type=int, default=os.cpu_count(), help="parallel compile jobs of a project")
     parser.add_argument("--package", action="store_true", help="pack the archive once built")
-    parser.add_argument("--update-lock", action="store_true", help="download what lock.json misses, record its hash, and stop")
+    parser.add_argument(
+        "--update-lock", action="store_true", help="download what lock.json misses, record its hash, and stop"
+    )
     arguments = parser.parse_args()
 
     if not PLATFORM:

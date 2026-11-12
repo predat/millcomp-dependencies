@@ -32,7 +32,11 @@ def parse(version):
 
 def newest(versions, current, series):
     """The highest of `versions` above `current` in `series`, or None."""
-    allowed = [v for v in versions if (series is None or v == series or v.startswith(series + ".")) and parse(v) > parse(current)]
+    allowed = [
+        v
+        for v in versions
+        if (series is None or v == series or v.startswith(series + ".")) and parse(v) > parse(current)
+    ]
     return max(allowed, key=parse) if allowed else None
 
 
@@ -46,7 +50,9 @@ def get(url):
 
 
 def gitTags(project, spec, text):
-    output = subprocess.run(["git", "ls-remote", "--tags", "--refs", spec["repo"]], capture_output=True, text=True, check=True).stdout
+    output = subprocess.run(
+        ["git", "ls-remote", "--tags", "--refs", spec["repo"]], capture_output=True, text=True, check=True
+    ).stdout
     tags = {}
     for line in output.splitlines():
         tag = line.split("refs/tags/", 1)[1]
@@ -76,7 +82,15 @@ def pythonBuildStandalone(project, spec, text):
     found = newest(versions or [], current, spec.get("series"))
     if not found:  # a new build of the same CPython is not worth rebuilding everything that links it
         return None
-    return current, found, [("plain", f"/download/{oldDate}/", f"/download/{date}/"), ("plain", f"%2B{oldDate}-", f"%2B{date}-"), ("version", current, found)]
+    return (
+        current,
+        found,
+        [
+            ("plain", f"/download/{oldDate}/", f"/download/{date}/"),
+            ("plain", f"%2B{oldDate}-", f"%2B{date}-"),
+            ("version", current, found),
+        ],
+    )
 
 
 def qt(project, spec, text):
@@ -98,16 +112,23 @@ def allows(requires, python):
         operator, version = re.fullmatch(r"(~=|===|==|!=|<=|>=|<|>)\s*(.+)", clause).groups()
         if version.endswith(".*"):  # a prefix
             prefix = parse(version[:-2])
-            if (python[:len(prefix)] == prefix) != (operator == "=="):
+            if (python[: len(prefix)] == prefix) != (operator == "=="):
                 return False
             continue
         bound = parse(version)
-        padded = python[:len(bound)] + (0,) * (len(bound) - len(python))
+        padded = python[: len(bound)] + (0,) * (len(bound) - len(python))
         if operator == "~=":
-            if not (padded >= bound and python[:len(bound) - 1] == bound[:-1]):
+            if not (padded >= bound and python[: len(bound) - 1] == bound[:-1]):
                 return False
-        elif not {"==": padded == bound, "===": padded == bound, "!=": padded != bound, "<=": padded <= bound,
-                  ">=": padded >= bound, "<": padded < bound, ">": padded > bound}[operator]:
+        elif not {
+            "==": padded == bound,
+            "===": padded == bound,
+            "!=": padded != bound,
+            "<=": padded <= bound,
+            ">=": padded >= bound,
+            "<": padded < bound,
+            ">": padded > bound,
+        }[operator]:
             return False
     return True
 
@@ -118,8 +139,12 @@ def pypi(project, spec, text):
     python = parse(project["version"])
     current = re.search(rf"'{re.escape(package)}==([\d.]+)'", text).group(1)
     releases = json.loads(get(f"https://pypi.org/pypi/{package}/json"))["releases"]
-    final = [v for v, files in releases.items() if re.fullmatch(r"\d+(\.\d+)*", v)
-             and any(not f.get("yanked") and allows(f.get("requires_python"), python) for f in files)]
+    final = [
+        v
+        for v, files in releases.items()
+        if re.fullmatch(r"\d+(\.\d+)*", v)
+        and any(not f.get("yanked") and allows(f.get("requires_python"), python) for f in files)
+    ]
     found = newest(final, current, spec.get("series"))
     return (current, found, [("plain", f"'{package}=={current}'", f"'{package}=={found}'")]) if found else None
 
@@ -185,7 +210,9 @@ def main():
         print(f"warning: {problem}", flush=True)
     rows = [row for applied in changes for row in applied]
     if arguments.summary:
-        lines = ["| Dependency | From | To |", "|---|---|---|"] + [f"| {label} | {old} | {new} |" for label, old, new in rows]
+        lines = ["| Dependency | From | To |", "|---|---|---|"] + [
+            f"| {label} | {old} | {new} |" for label, old, new in rows
+        ]
         if problems:
             lines += ["", "Not updated:", ""] + [f"- {problem}" for problem in problems]
         pathlib.Path(arguments.summary).write_text("\n".join(lines) + "\n")

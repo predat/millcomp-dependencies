@@ -41,7 +41,9 @@ def main():
             # The Vulkan loader looks for drivers in system places only: millComp points it at the archive's MoltenVK too.
             environment["VK_DRIVER_FILES"] = str(deps / "share/vulkan/icd.d/MoltenVK_icd.json")
         if not windows:
-            environment["LD_LIBRARY_PATH"] = os.pathsep.join(str(path) for path in [deps / "lib", deps / "qt/lib", deps / "python/lib"])
+            environment["LD_LIBRARY_PATH"] = os.pathsep.join(
+                str(path) for path in [deps / "lib", deps / "qt/lib", deps / "python/lib"]
+            )
         build = temporary / "build"
         subprocess.run(
             [
@@ -54,7 +56,9 @@ def main():
             check=True, env=environment,
         )  # fmt: skip
         subprocess.run(["cmake", "--build", str(build), "-j", str(arguments.jobs)], check=True, env=environment)
-        subprocess.run([str(build / ("smoke.exe" if windows else "smoke")), str(temporary), str(deps)], check=True, env=environment)
+        subprocess.run(
+            [str(build / ("smoke.exe" if windows else "smoke")), str(temporary), str(deps)], check=True, env=environment
+        )
 
         environment["PYTHONPATH"] = os.pathsep.join([str(build), str(deps / "lib/python")])
         check = "import _smoke, numpy; from pxr import Usd, Sdf; assert _smoke.answer() == 42 and Usd.Stage.CreateInMemory(); print('Python:', numpy.__version__)"

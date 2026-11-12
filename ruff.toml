@@ -1,0 +1,6 @@
+# ruff format: the repository's Python style.
+line-length = 120
+
+[format]
+# config.py's single quotes are kept: updates.py finds pins like 'numpy==2.5.4' in them.
+quote-style = "preserve"
