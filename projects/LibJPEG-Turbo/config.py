@@ -1,6 +1,6 @@
-{'version': '3.1.2',
+{'version': '3.2.1',
  'url': 'https://libjpeg-turbo.org',
- 'downloads': ['https://github.com/libjpeg-turbo/libjpeg-turbo/archive/refs/tags/3.1.2.tar.gz'],
+ 'downloads': ['https://github.com/libjpeg-turbo/libjpeg-turbo/archive/refs/tags/3.2.1.tar.gz'],
  'license': ['LICENSE.md'],
  'cmake': ['-DENABLE_STATIC=OFF', '-DWITH_TURBOJPEG=OFF'],
  # New versions, within the series (updates.py)
