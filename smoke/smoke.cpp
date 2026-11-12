@@ -10,6 +10,8 @@
 #include <OpenImageIO/imagebufalgo.h>
 #include <QGuiApplication>
 #include <rhi/qshaderbaker.h>
+#include <pxr/base/plug/plugin.h>
+#include <pxr/base/plug/registry.h>
 #include <pxr/usd/sdf/fileFormat.h>
 #include <pxr/usd/sdf/layer.h>
 #include <pxr/usd/usd/prim.h>
@@ -101,9 +103,12 @@ int main(int argc, char** argv)
     const UsdPrim prim = stage->DefinePrim(SdfPath("/comp"));
     check(prim.IsValid() && SdfFileFormat::FindByExtension("usda"), "USD (its plugins found)");
     check(SdfFileFormat::FindByExtension("mtlx") != nullptr, "USD MaterialX plugin (usdMtlx)");
+    const PlugPluginPtr shaders = PlugRegistry::GetInstance().GetPluginWithName("usdShaders");
+    check(shaders && shaders->Load(), "USD plugin library (usdShaders, in lib/usd)");
 
-    // MaterialX finds its data libraries next to the executable: millComp, as this test, says where they are.
-    const MaterialX::FilePath deps(argc > 2 ? argv[2] : ".");
+    // MaterialX finds its data libraries next to the executable: millComp, as this test, says where they are, the
+    // directory holding libraries/ (share/materialx in the archive).
+    const MaterialX::FilePath deps = MaterialX::FilePath(argc > 2 ? argv[2] : ".") / "share" / "materialx";
     MaterialX::DocumentPtr stdlib = MaterialX::createDocument();
     MaterialX::loadLibraries({"libraries"}, MaterialX::FileSearchPath(deps), stdlib);
     check(!stdlib->getNodeDefs().empty(), "MaterialX (its libraries found)");

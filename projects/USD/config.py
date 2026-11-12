@@ -4,6 +4,26 @@
     'downloads': ['https://github.com/PixarAnimationStudios/OpenUSD/archive/refs/tags/v26.11.1.tar.gz'],
     'license': ['LICENSE.txt'],
     'dependencies': ['Python', 'TBB', 'MaterialX'],
+    # Installed where CMake finds packages and USD finds plugins, instead of USD's own places at the archive's top:
+    # pxrConfig.cmake and its targets in lib/cmake/pxr (not ./ and cmake/), its plugins in lib/usd with its libraries'
+    # (not plugin/usd, a difference USD's own comment wonders about). CMake computes the targets' prefix from where they
+    # are installed; pxrConfig.cmake finds the rest from its own directory.
+    'edits': [
+        ['pxr/CMakeLists.txt', 'DESTINATION "${CMAKE_INSTALL_PREFIX}"', 'DESTINATION "lib/cmake/pxr"'],
+        [
+            'pxr/CMakeLists.txt',
+            'install(EXPORT pxrTargets DESTINATION "cmake")',
+            'install(EXPORT pxrTargets DESTINATION "lib/cmake/pxr")',
+        ],
+        ['pxr/pxrConfig.cmake.in', '"${PXR_CMAKE_DIR}/cmake/pxrTargets.cmake"', '"${PXR_CMAKE_DIR}/pxrTargets.cmake"'],
+        ['pxr/pxrConfig.cmake.in', '"${PXR_CMAKE_DIR}/include"', '"${PXR_CMAKE_DIR}/../../../include"'],
+        [
+            'cmake/macros/Private.cmake',
+            '_get_install_dir("plugin/usd" pluginInstallPrefix)',
+            '_get_install_dir("lib/usd" pluginInstallPrefix)',
+        ],
+        ['cmake/macros/Public.cmake', 'DESTINATION plugin/usd', 'DESTINATION lib/usd'],
+    ],
     'cmake': [
         '-DPXR_BUILD_IMAGING=OFF',
         '-DPXR_BUILD_USD_IMAGING=OFF',
@@ -24,7 +44,6 @@
         # The same on every platform, where millComp looks: lib/python/pxr. USD's default is Python's
         # site-packages, which differs between platforms.
         '-DPXR_PYTHON_INSTALL_DIR=lib/python',
-        '-DPXR_INSTALL_LOCATION=../plugin/usd',
     ],
     # python-build-standalone's macOS python3 links Python statically, though its sysconfig names libpython3.X.dylib, so
     # USD does not find out by itself: its modules linking libpython would load a second Python in the process, which

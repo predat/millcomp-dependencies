@@ -7,6 +7,8 @@
     # libraries/. No render platform modules (they need OpenGL, Metal), no Python, viewer or graph editor.
     'cmake': [
         '-DMATERIALX_BUILD_SHARED_LIBS=ON',
+        # Its data libraries (.mtlx, shader code): share/materialx/libraries, not libraries/ at the archive's top.
+        '-DMATERIALX_INSTALL_STDLIB_PATH=share/materialx/libraries',
         '-DMATERIALX_BUILD_PYTHON=OFF',
         '-DMATERIALX_BUILD_VIEWER=OFF',
         '-DMATERIALX_BUILD_GRAPH_EDITOR=OFF',

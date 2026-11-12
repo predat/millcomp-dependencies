@@ -4,7 +4,14 @@
     'downloads': ['https://github.com/wjakob/nanobind/archive/refs/tags/v3.1.0.tar.gz'],
     'license': ['LICENSE'],
     'dependencies': ['Python', 'Robin-map'],
-    'cmake': ['-DNB_TEST=OFF', '-DNB_USE_SUBMODULE_DEPS=OFF', '-DNB_CREATE_INSTALL_RULES=ON'],
+    'cmake': [
+        '-DNB_TEST=OFF',
+        '-DNB_USE_SUBMODULE_DEPS=OFF',
+        '-DNB_CREATE_INSTALL_RULES=ON',
+        # Its sources, compiled into each module, are data: share/nanobind (not nanobind/ at the archive's top). CMake finds
+        # share/nanobind/cmake/nanobind-config.cmake.
+        '-DNB_INSTALL_DATADIR=share/nanobind',
+    ],
     # New versions, within the series (updates.py)
     'updates': [
         {

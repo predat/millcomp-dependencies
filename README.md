@@ -41,6 +41,20 @@ Most projects are compiled from source. A few are taken prebuilt from their offi
 
 ## Using an archive
 
+An archive holds:
+
+```
+bin/            executables (and the DLLs, on Windows)
+include/        headers
+lib/            libraries; CMake packages (lib/cmake); USD's plugins (lib/usd) and Python modules (lib/python)
+licenses/       one directory per project
+python/         Python, with numpy
+qt/             Qt, in its own tree
+share/          data: MaterialX's libraries (share/materialx), nanobind's sources (share/nanobind), the MoltenVK
+                driver's manifest on macOS (share/vulkan)…
+manifest.json   every project's version and sources
+```
+
 Unpack the archive anywhere: it is relocatable, and the CMake and pkg-config files use relative paths. Then build and
 run millComp against it:
 
@@ -59,8 +73,9 @@ export PYTHONPATH="$DEPS/lib/python"          # pxr
 
 A few points need care in millComp itself:
 
-- **MaterialX** searches for its data libraries next to the executable. Pass it the archive's path:
-  `MaterialX::loadLibraries({"libraries"}, MaterialX::FileSearchPath(deps), …)`.
+- **MaterialX** searches for its data libraries next to the executable. They are in `share/materialx/libraries`: pass
+  it the directory that holds them, `MaterialX::loadLibraries({"libraries"}, MaterialX::FileSearchPath(deps /
+  "share/materialx"), …)`, and the same to `GenContext::registerSourceCodeSearchPath`.
 - **Vulkan on macOS**: the loader only looks for drivers in system locations. Point it at the archive's MoltenVK with
   `VK_DRIVER_FILES=$DEPS/share/vulkan/icd.d/MoltenVK_icd.json`, and enable portability enumeration on the instance.
 - **TBB with Qt**: compile with `QT_NO_EMIT`, because TBB uses `emit` as an identifier.

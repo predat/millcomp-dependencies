@@ -39,6 +39,7 @@ EXCLUDED = [
     "doc/*",
     "man/*",
     "*/__pycache__/*",
+    "tests/*",  # USD installs a test library (tests/lib/libexecTest.so) with its tests off
     "*.pdb",
     "python/lib/python3.*/test/*",
     "python/Lib/test/*",
