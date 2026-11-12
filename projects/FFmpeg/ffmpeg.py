@@ -105,7 +105,9 @@ def main():
         environment["PATH"] = os.pathsep.join(
             [str(pathlib.Path(cl).parent), str(MSYS2 / "usr/bin"), environment["PATH"]]
         )
-        environment["PKG_CONFIG_LIBDIR"] = msys(prefix / "lib/pkgconfig")
+        # MSYS2's own pkg-config would give the archive's .pc files' ${pcfiledir} as /d/..., which cl.exe and link.exe do
+        # not read: its Windows one gives D:/... (and reads a Windows PKG_CONFIG_LIBDIR).
+        options += [f"--pkg-config={msys(MSYS2 / 'mingw64/bin/pkg-config.exe')}"]
         configure = msys(configure)
         # link.exe's flags, given to it as they are (configure makes -L -libpath: in pkg-config's flags only).
         options += [
@@ -128,8 +130,8 @@ def main():
         run([configure, *options], build, environment)
     except subprocess.CalledProcessError:
         log = build / "ffbuild/config.log"
-        if log.exists():  # what configure tried last, which its message does not say
-            print("".join(log.read_text(errors="replace").splitlines(keepends=True)[-60:]), flush=True)
+        if log.exists():  # what configure tried, which its message does not say
+            print(log.read_text(errors="replace"), flush=True)
         raise
     if PLATFORM == "linux":
         config = build / "ffbuild/config.mak"

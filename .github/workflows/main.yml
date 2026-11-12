@@ -51,7 +51,7 @@ jobs:
         if: matrix.platform == 'windows'
         shell: pwsh
         run: |
-          C:\msys64\usr\bin\pacman.exe -S --noconfirm --needed make pkgconf diffutils
+          C:\msys64\usr\bin\pacman.exe -S --noconfirm --needed make diffutils mingw-w64-x86_64-pkgconf
           choco install nasm -y --no-progress
           "C:\Program Files\NASM" | Out-File -FilePath $env:GITHUB_PATH -Append -Encoding utf8
 

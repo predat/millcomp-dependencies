@@ -79,7 +79,7 @@ A few points need care in millComp itself:
 The requirements are Python 3.10 or later, CMake, Ninja, Meson, pkg-config and a C++ compiler:
 - **Linux**: gcc 14, plus the headers `libgl-dev`, `libegl-dev`, `libx11-dev` and `libxkbcommon-dev`, and `nasm`.
 - **Windows**: Visual Studio with the C++ tools, run from a developer command prompt; `nasm` on `PATH`; MSYS2 in
-  `C:\msys64` (or `MSYS2_ROOT`) with `make`, `pkgconf` and `diffutils`, where FFmpeg's configure runs.
+  `C:\msys64` (or `MSYS2_ROOT`) with `make`, `diffutils` and `mingw-w64-x86_64-pkgconf`, where FFmpeg's configure runs.
 - **macOS**: Xcode.
 
 The CI's exact setup is in `.github/workflows/main.yml`.
