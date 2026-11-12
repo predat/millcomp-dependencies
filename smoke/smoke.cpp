@@ -18,12 +18,18 @@
 #include <slang.h>
 #include <tbb/parallel_for.h>
 #include <vulkan/vulkan.h>
+extern "C" {
+#include <libavcodec/avcodec.h>
+}
 
 #include <atomic>
+#include <initializer_list>
+#include <memory>
 #include <cstdio>
 #include <cstdlib>
 #include <stdexcept>
 #include <string>
+#include <vector>
 
 PXR_NAMESPACE_USING_DIRECTIVE
 
@@ -32,6 +38,27 @@ static void check(bool ok, const char* name)
     std::printf("%s: %s\n", name, ok ? "ok" : "FAILED");
     if (!ok)
         std::exit(1);
+}
+
+// A movie smoke.py wrote with the archive's ffmpeg, read by OpenImageIO's ffmpeg plugin: its frames are subimages.
+static void checkMovie(const std::string& path, int channels, OIIO::TypeDesc format, const char* name)
+{
+    // .mxf is not among the plugin's extensions: millComp asks for the plugin, as here.
+    auto input = path.ends_with(".mxf") ? OIIO::ImageInput::create("ffmpeg") : OIIO::ImageInput::open(path);
+    OIIO::ImageSpec spec;
+    const bool opened = input && (!path.ends_with(".mxf") || input->open(path, spec));
+    if (!opened)
+        std::printf("%s\n", OIIO::geterror().c_str());
+    check(opened, name);
+    int frames = 0;
+    while (input->seek_subimage(frames, 0))
+        ++frames;
+    spec = input->spec(5, 0);
+    std::vector<unsigned char> pixels(spec.image_bytes());
+    const bool read = input->read_image(5, 0, 0, spec.nchannels, spec.format, pixels.data());
+    std::printf("%s: %d frames, %dx%d, %d channels, %s\n", name, frames, spec.width, spec.height, spec.nchannels,
+                spec.format.c_str());
+    check(read && frames >= 10 && spec.nchannels == channels && spec.format == format, name);
 }
 
 int main(int argc, char** argv)
@@ -49,6 +76,25 @@ int main(int argc, char** argv)
     float pixel[4];
     back.getpixel(3, 3, pixel);
     check(back.read() && pixel[2] == 0.75f, "OpenImageIO read");
+
+    // FFmpeg: the encoders millComp writes with, the decoders, and OpenImageIO reading movies.
+    for (const char* encoder : {"prores_ks", "dnxhd", "libsvtav1", "ffv1", "mjpeg", "png",
+#ifdef __APPLE__
+                                "h264_videotoolbox", "hevc_videotoolbox", "prores_videotoolbox",
+#else
+                                "h264_nvenc", "hevc_nvenc", "av1_nvenc",
+#endif
+#ifdef _WIN32
+                                "h264_mf", "hevc_mf",
+#endif
+         })
+        check(avcodec_find_encoder_by_name(encoder) != nullptr, (std::string("FFmpeg encoder ") + encoder).c_str());
+    for (const char* decoder : {"prores", "dnxhd", "h264", "hevc", "vp9", "libdav1d"})
+        check(avcodec_find_decoder_by_name(decoder) != nullptr, (std::string("FFmpeg decoder ") + decoder).c_str());
+    const std::string movies = argc > 1 ? argv[1] : ".";
+    checkMovie(movies + "/prores.mov", 4, OIIO::TypeDesc::UINT16, "OpenImageIO movie: ProRes 4444, alpha");
+    checkMovie(movies + "/dnxhr.mxf", 3, OIIO::TypeDesc::UINT16, "OpenImageIO movie: DNxHR HQX, MXF");
+    checkMovie(movies + "/av1.mp4", 3, OIIO::TypeDesc::UINT8, "OpenImageIO movie: AV1 (dav1d)");
 
     const auto config = OCIO_NAMESPACE::Config::CreateFromFile("ocio://default");
     check(config && config->getColorSpace("ACEScg"), "OpenColorIO");

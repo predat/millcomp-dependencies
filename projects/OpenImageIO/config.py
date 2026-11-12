@@ -14,6 +14,7 @@
         'LibJPEG-Turbo',
         'FreeType',
         'ZLib',
+        'FFmpeg',
     ],
     'cmake': [
         '-DOIIO_BUILD_TESTS=OFF',
@@ -23,7 +24,7 @@
         '-DINSTALL_DOCS=OFF',
         '-DOIIO_INTERNALIZE_FMT=OFF',
         '-DSTOP_ON_WARNING=OFF',
-        '-DUSE_FFMPEG=OFF',
+        '-DUSE_FFMPEG=ON',  # movies: ProRes, DNxHD/DNxHR, H.264, HEVC, VP9, AV1… (.mxf: ImageInput::create("ffmpeg"))
         '-DUSE_LIBRAW=OFF',
         '-DUSE_OPENCV=OFF',
         '-DUSE_OPENVDB=OFF',

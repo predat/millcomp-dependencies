@@ -5,7 +5,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## What this is
 
 This repository builds millComp's third-party dependencies (USD, OpenImageIO, OpenColorIO, Qt, Slang, Python, Vulkan,
-MaterialX, …) from source. It packs them into one relocatable archive per platform: Linux x86_64, Windows x64 (MSVC)
+MaterialX, FFmpeg, …) from source. It packs them into one relocatable archive per platform: Linux x86_64, Windows x64 (MSVC)
 and macOS arm64. The approach is the same as GafferHQ/dependencies. The CI publishes the archives as GitHub releases.
 
 ## Commands
@@ -40,7 +40,8 @@ proves the archive is complete and relocatable.
   `{projectDir}` and `{jobs}`. When a project has `cmake` keys, `build.py` adds common flags: Ninja, Release, shared
   libraries, rpaths, the Python location, and on macOS the deployment target 14.4 and Homebrew prefixes ignored.
   Helper scripts sit next to the config (`Qt/fetch.py`, `Slang/macos.py`, `MoltenVK/install.py`,
-  `MaterialX/noX11.cmake`).
+  `MaterialX/noX11.cmake`, `FFmpeg/ffmpeg.py`). FFmpeg is configured by `ffmpeg.py` (LGPL only, `--disable-autodetect`;
+  on Windows through MSYS2's bash with MSVC); Dav1d uses Meson through `commands`.
 - **`lock.json`** pins the sha256 of every download. A new or changed URL needs `--update-lock` (or `updates.py`).
 - **Incremental builds.** Each project has a digest, written to `build/install/.stamps/<name>`. It combines the
   evaluated config (excluding `updates` and comments, so formatting and comments don't trigger a rebuild), the raw

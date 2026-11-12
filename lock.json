@@ -1,9 +1,12 @@
 {
+  "https://code.videolan.org/videolan/dav1d/-/archive/1.5.4/dav1d-1.5.4.tar.gz": "a1d5b63d2d38ec9bd03acf643caa51fa22edd1e89c5a109c4807717216bbec07",
   "https://github.com/AcademySoftwareFoundation/Imath/archive/refs/tags/v3.2.3.tar.gz": "e10c12b3f21f45bf08e09d4215d9c7691368d747beebd840de0b6fefed2df9f8",
   "https://github.com/AcademySoftwareFoundation/MaterialX/archive/refs/tags/v1.39.5.tar.gz": "c0d739b70a36f6f72888a0e8e66db5c83ae87c40737cc9b51c108166804f3a3b",
   "https://github.com/AcademySoftwareFoundation/OpenColorIO/archive/refs/tags/v2.6.0.tar.gz": "784ac37bde5b9c6e5dc15f23d1235bd1452d376cdc03627d6d6dd310f375a735",
   "https://github.com/AcademySoftwareFoundation/OpenImageIO/archive/refs/tags/v3.2.2.0.tar.gz": "fa94876cfbd4c817deaba81ced8bad4af2956689faf4085f277b20197cd70b4e",
   "https://github.com/AcademySoftwareFoundation/openexr/archive/refs/tags/v3.5.3.tar.gz": "ff1de95f4031c1c57c633e647dc97c15282d3aa3bc7fb90745f00f74de4a054f",
+  "https://github.com/FFmpeg/FFmpeg/archive/refs/tags/n9.0.2.tar.gz": "6e374ed621e48faa40639307dff48ba6fe574a509977956d2cce9669b7cc27e9",
+  "https://github.com/FFmpeg/nv-codec-headers/archive/refs/tags/n12.2.72.0.tar.gz": "dbeaec433d93b850714760282f1d0992b1254fc3b5a6cb7d76fc1340a1e47563",
   "https://github.com/KhronosGroup/MoltenVK/releases/download/v1.4.2/MoltenVK-macos.tar": "f95765a6229cb7b915990a2890ce12ebe36a730b021545d3d52ae69ce4c4024e",
   "https://github.com/KhronosGroup/Vulkan-Headers/archive/refs/tags/v1.4.368.tar.gz": "5c5c6f64fcce28a24cc934143a048707af036a858e4ed11d7f71fe016006ecda",
   "https://github.com/KhronosGroup/Vulkan-Loader/archive/refs/tags/v1.4.368.tar.gz": "d2fe102c8493d80f2e3d6c5b3304a331e69072d7a041b1323c6f0246b94cbf3c",
@@ -23,5 +26,6 @@
   "https://github.com/shader-slang/slang/releases/download/v2026.22/slang-2026.22-macos-aarch64.tar.gz": "885b5bd9a79a1ae81fdb92212f5f7c785001f870d45c39f9bb5df01339db3fea",
   "https://github.com/shader-slang/slang/releases/download/v2026.22/slang-2026.22-windows-x86_64.zip": "dd0c4a86bd44cdb7e9cf712af0c8ebf2fff1bba19fa5e3c128ff87384e8ff17b",
   "https://github.com/uxlfoundation/oneTBB/archive/refs/tags/v2023.2.0.tar.gz": "80cb62e62defeee67ea1885a6f72d97ac81404f8fde9cded62fb51524808a30c",
-  "https://github.com/wjakob/nanobind/archive/refs/tags/v3.1.0.tar.gz": "39659890a112e84e7263e4a263c71dd2621f866f7a4386ce95ef410e6c0e5c2f"
+  "https://github.com/wjakob/nanobind/archive/refs/tags/v3.1.0.tar.gz": "39659890a112e84e7263e4a263c71dd2621f866f7a4386ce95ef410e6c0e5c2f",
+  "https://gitlab.com/AOMediaCodec/SVT-AV1/-/archive/v4.3.0/SVT-AV1-v4.3.0.tar.gz": "95ce8fc2381ba707e65ac8b9b2e165915bfbe9cd4d2f7b0f58d64ce31bd98f6d"
 }

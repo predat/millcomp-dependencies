@@ -56,6 +56,17 @@ def main():
             check=True, env=environment,
         )  # fmt: skip
         subprocess.run(["cmake", "--build", str(build), "-j", str(arguments.jobs)], check=True, env=environment)
+        # Movies for smoke.cpp's OpenImageIO, written by the archive's ffmpeg: 12 frames of a test pattern each.
+        ffmpeg = deps / "bin" / ("ffmpeg.exe" if windows else "ffmpeg")
+        movies = {
+            "prores.mov": ["format=yuva444p10le", "-c:v", "prores_ks", "-profile:v", "4444"],
+            "dnxhr.mxf": ["format=yuv422p10le", "-c:v", "dnxhd", "-profile:v", "dnxhr_hqx"],
+            "av1.mp4": ["format=yuv420p", "-c:v", "libsvtav1", "-preset", "12"],
+        }
+        for name, (pixels, *codec) in movies.items():
+            pattern = f"testsrc2=size=1280x720:rate=24:duration=0.5,{pixels}"
+            command = [str(ffmpeg), "-v", "error", "-y", "-filter_complex", pattern, *codec, str(temporary / name)]
+            subprocess.run(command, check=True, env=environment)
         subprocess.run(
             [str(build / ("smoke.exe" if windows else "smoke")), str(temporary), str(deps)], check=True, env=environment
         )

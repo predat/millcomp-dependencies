@@ -27,6 +27,8 @@ The archive contains the following libraries:
 - **nanobind** and **robin-map**
 - **fmt** and **GoogleTest**
 - **zlib**, **libpng**, **libjpeg-turbo**, **libtiff** and **FreeType**
+- **FFmpeg** (LGPL), with **dav1d**, **SVT-AV1** and the NVENC/NVDEC headers: OpenImageIO reads movies through it, and
+  millComp can write them with its API
 
 Each archive's `manifest.json` gives the exact version of every project, its URL and the sha256 of its sources. The
 licences are in `licenses/<project>/`. Each project's recipe is in `projects/<Name>/config.py`.
@@ -62,6 +64,11 @@ A few points need care in millComp itself:
 - **Vulkan on macOS**: the loader only looks for drivers in system locations. Point it at the archive's MoltenVK with
   `VK_DRIVER_FILES=$DEPS/share/vulkan/icd.d/MoltenVK_icd.json`, and enable portability enumeration on the instance.
 - **TBB with Qt**: compile with `QT_NO_EMIT`, because TBB uses `emit` as an identifier.
+- **Movies** open with OpenImageIO like images, each frame a subimage (ProRes, DNxHD/DNxHR, H.264, HEVC, VP9, AV1…).
+  `.mxf` is not among its ffmpeg plugin's extensions: ask for the plugin, `OIIO::ImageInput::create("ffmpeg")`. FFmpeg
+  is LGPL, without x264 or x265: millComp encodes with ProRes, DNxHR, FFV1, SVT-AV1, or the GPU's H.264/HEVC encoders
+  (NVENC, VideoToolbox, Media Foundation). FFmpeg has no CMake package: find `libavcodec/avcodec.h` and the `avcodec`,
+  `avformat`, `avutil`, `swscale` libraries in the archive.
 - **On Linux**, the archive only expects the C and C++ runtimes from the system, plus X11 and the graphics libraries
   that any Qt application needs.
 
@@ -69,9 +76,10 @@ A few points need care in millComp itself:
 
 ## Building
 
-The requirements are Python 3.10 or later, CMake, Ninja and a C++ compiler:
+The requirements are Python 3.10 or later, CMake, Ninja, Meson, pkg-config and a C++ compiler:
 - **Linux**: gcc 14, plus the headers `libgl-dev`, `libegl-dev`, `libx11-dev` and `libxkbcommon-dev`, and `nasm`.
-- **Windows**: Visual Studio with the C++ tools, run from a developer command prompt.
+- **Windows**: Visual Studio with the C++ tools, run from a developer command prompt; `nasm` on `PATH`; MSYS2 in
+  `C:\msys64` (or `MSYS2_ROOT`) with `make`, `pkgconf` and `diffutils`, where FFmpeg's configure runs.
 - **macOS**: Xcode.
 
 The CI's exact setup is in `.github/workflows/main.yml`.
@@ -101,8 +109,14 @@ nothing else:
     'downloads': ['https://github.com/AcademySoftwareFoundation/Imath/archive/refs/tags/v3.2.3.tar.gz'],
     'license': ['LICENSE.md'],
     'cmake': ['-DBUILD_TESTING=OFF', '-DPYTHON=OFF'],
-    'updates': [{'kind': 'git-tags', 'repo': 'https://github.com/AcademySoftwareFoundation/Imath',
-                 'tag': r'v(\d+)\.(\d+)\.(\d+)', 'series': '3'}],
+    'updates': [
+        {
+            'kind': 'git-tags',
+            'repo': 'https://github.com/AcademySoftwareFoundation/Imath',
+            'tag': r'v(\d+)\.(\d+)\.(\d+)',
+            'series': '3',
+        }
+    ],
 }
 ```
 
