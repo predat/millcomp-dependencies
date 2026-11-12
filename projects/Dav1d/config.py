@@ -22,6 +22,8 @@
         ['meson', 'compile', '-C', '{work}/build', '-j', '{jobs}'],
         ['meson', 'install', '-C', '{work}/build'],
     ],
+    'commands:macos': [['{python}', '{projectDir}/macos.py', '--prefix', '{buildDir}']],
+    'dependencies:macos': ['Python'],
     # New versions, within the series (updates.py)
     'updates': [
         {
