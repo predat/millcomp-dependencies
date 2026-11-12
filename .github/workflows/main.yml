@@ -28,9 +28,9 @@ jobs:
     env:
       WORK: ${{ matrix.platform == 'windows' && 'D:/w' || 'build/work' }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v7
         with:
           python-version: "3.12"
 
@@ -45,13 +45,23 @@ jobs:
           echo "CC=gcc-14" >> "$GITHUB_ENV"
           echo "CXX=g++-14" >> "$GITHUB_ENV"
 
+      # vcvars64.bat's environment, for the steps after: what it adds or changes.
       - name: MSVC environment
         if: matrix.platform == 'windows'
-        uses: ilammy/msvc-dev-cmd@v1
+        shell: pwsh
+        run: |
+          $vs = & "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe" -latest -products * `
+            -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -property installationPath
+          if (-not $vs) { throw "no Visual Studio with the C++ tools" }
+          $before = @{}
+          Get-ChildItem env: | ForEach-Object { $before[$_.Name] = $_.Value }
+          cmd /c "`"$vs\VC\Auxiliary\Build\vcvars64.bat`" >nul && set" | ForEach-Object {
+            if ($_ -match '^([^=]+)=(.*)$' -and $before[$matches[1]] -ne $matches[2]) { "$($matches[1])=$($matches[2])" }
+          } | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
 
       # v2: build.py records what each project installs since; caches without the records start again.
       - name: Restore what was built
-        uses: actions/cache/restore@v4
+        uses: actions/cache/restore@v6
         with:
           path: build/install
           key: deps-v2-${{ matrix.platform }}-${{ hashFiles('build.py', 'lock.json', 'projects/**') }}-${{ github.run_id }}
@@ -62,7 +72,7 @@ jobs:
 
       - name: Save what was built
         if: always()
-        uses: actions/cache/save@v4
+        uses: actions/cache/save@v6
         with:
           path: build/install
           key: deps-v2-${{ matrix.platform }}-${{ hashFiles('build.py', 'lock.json', 'projects/**') }}-${{ github.run_id }}-${{ github.run_attempt }}
@@ -71,7 +81,7 @@ jobs:
         shell: bash
         run: python smoke/smoke.py "$(ls build/package/millcompDependencies-* | grep -v sha256)"
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: millcompDependencies-${{ matrix.platform }}
           path: build/package/*
@@ -83,7 +93,7 @@ jobs:
     needs: build
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v8
         with:
           merge-multiple: true
       - env:
