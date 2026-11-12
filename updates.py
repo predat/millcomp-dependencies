@@ -72,10 +72,11 @@ def pythonBuildStandalone(project, spec, text):
     release = json.loads(get("https://api.github.com/repos/astral-sh/python-build-standalone/releases/latest"))
     date = release["tag_name"]
     oldDate = re.search(r"/download/(\d{8})/", text).group(1)
-    triples = set(re.findall(r"cpython-[\d.]+%2B\d{8}-([\w-]+)-install_only\.tar\.gz", text))
+    # (triple, flavour): install_only or install_only_stripped, which updating keeps.
+    builds = set(re.findall(r"cpython-[\d.]+%2B\d{8}-([\w-]+?)-(install_only(?:_stripped)?)\.tar\.gz", text))
     versions = None
-    for triple in triples:  # a version every platform has
-        pattern = rf"cpython-(\d+\.\d+\.\d+)\+{date}-{re.escape(triple)}-install_only\.tar\.gz"
+    for triple, flavour in builds:  # a version every platform has
+        pattern = rf"cpython-(\d+\.\d+\.\d+)\+{date}-{re.escape(triple)}-{flavour}\.tar\.gz"
         found = {match.group(1) for asset in release["assets"] if (match := re.fullmatch(pattern, asset["name"]))}
         versions = found if versions is None else versions & found
     current = project["version"]

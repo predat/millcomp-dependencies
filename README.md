@@ -5,9 +5,9 @@ The approach is the same as [GafferHQ/dependencies](https://github.com/GafferHQ/
 
 | Platform | Archive | Built on |
 |---|---|---|
-| Linux x86_64 | `millcompDependencies-<version>-linux.tar.gz` | Rocky Linux 9 (glibc 2.34), gcc-toolset-14 |
+| Linux x86_64 | `millcompDependencies-<version>-linux.tar.xz` | Rocky Linux 9 (glibc 2.34), gcc-toolset-14 |
 | Windows x64 | `millcompDependencies-<version>-windows.zip` | Windows Server 2025, MSVC |
-| macOS arm64 | `millcompDependencies-<version>-macos.tar.gz` | macOS 15, deployment target 14.4 |
+| macOS arm64 | `millcompDependencies-<version>-macos.tar.xz` | macOS 15, deployment target 14.4 |
 
 The archives are published as [releases](https://github.com/predat/millcomp-dependencies/releases), each with its
 `.sha256`.
@@ -103,7 +103,7 @@ The CI's exact setup is in `.github/workflows/main.yml`.
 ```sh
 python build.py --package          # everything, then build/package/millcompDependencies-*
 python build.py --projects USD     # USD and what it depends on, into build/install
-python smoke/smoke.py build/package/millcompDependencies-<version>-<platform>.tar.gz
+python smoke/smoke.py build/package/millcompDependencies-<version>-<platform>.tar.xz
 ```
 
 `build.py` only uses the standard library. Builds are incremental: a project is rebuilt only when its recipe, its
@@ -111,7 +111,8 @@ sources or one of its dependencies changes, so an interrupted build resumes wher
 work directory short to avoid the path-length limit, for example `--work-dir D:/w`.
 
 With `--package`, the archive is audited before it is packed. On Linux and macOS, a library that depends on something
-outside the archive and the system (Homebrew, the runner's packages) makes the build fail.
+outside the archive and the system (Homebrew, the runner's packages) makes the build fail. The libraries and programs
+are then stripped of their debug symbols, and the archive is compressed with xz (`tar xf` unpacks it).
 
 ## Recipes: `projects/<Name>/config.py`
 

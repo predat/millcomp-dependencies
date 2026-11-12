@@ -426,6 +426,39 @@ def auditMacos(buildDir):
     print(f"audit: {len(files)} files, nothing from the build machine")
 
 
+def strip(buildDir):
+    """Strips the debug symbols from the libraries and programs the projects built, which they leave in (Release
+    without them is RelWithDebInfo's job). They are a third of the archive and serve only a debugger. qt/ and python/
+    come from builds stripped already (and numpy's wheel libraries, edited by patchelf, are better left alone).
+    Windows keeps them apart, in the .pdb files the archive leaves out."""
+    before = after = 0
+    for path in sorted(buildDir.rglob("*")):
+        relative = path.relative_to(buildDir).as_posix()
+        if path.is_symlink() or not path.is_file() or relative.startswith(("qt/", "python/")):
+            continue
+        with open(path, "rb") as data:
+            header = data.read(18)
+        if PLATFORM == "linux":
+            # ELF, and a program or a library (e_type 2 or 3), not an object file
+            if header[:4] != b"\x7fELF" or header[16] not in (2, 3):
+                continue
+            command = [["strip", "--strip-unneeded", str(path)]]
+        else:
+            # Mach-O, 64-bit (or universal): arm64 runs signed code only, and stripping drops the signature
+            if header[:4] not in (b"\xcf\xfa\xed\xfe", b"\xca\xfe\xba\xbe"):
+                continue
+            command = [["strip", "-x", str(path)], ["codesign", "--force", "--sign", "-", str(path)]]
+        size = path.stat().st_size
+        mode = path.stat().st_mode
+        path.chmod(mode | 0o200)  # some install read-only
+        for step in command:
+            subprocess.run(step, check=True, capture_output=True)
+        path.chmod(mode)
+        before += size
+        after += path.stat().st_size
+    print(f"strip: {before >> 20} MB -> {after >> 20} MB")
+
+
 def relocate(buildDir):
     """Makes the CMake and pkg-config files relative to where they are: some record the install prefix as an absolute
     path (pxrConfig.cmake records Python's), which exists on the build machine only. Running it again changes nothing."""
@@ -471,10 +504,22 @@ def package(buildDir, output):
             for path, name in files:
                 data.write(path, name)
     else:
-        archive = output / f"{top}.tar.gz"
-        with tarfile.open(archive, "w:gz", compresslevel=6) as data:
-            for path, name in files:
-                data.add(path, name, recursive=False)
+        # xz: a third smaller than gzip. Through xz's own program when there is one, which uses every core.
+        archive = output / f"{top}.tar.xz"
+        xz = shutil.which("xz")
+        if xz:
+            with open(archive, "wb") as target:
+                process = subprocess.Popen([xz, "-6", "-T0", "-c"], stdin=subprocess.PIPE, stdout=target)
+                with tarfile.open(fileobj=process.stdin, mode="w|") as data:
+                    for path, name in files:
+                        data.add(path, name, recursive=False)
+                process.stdin.close()
+                if process.wait():
+                    sys.exit(f"xz failed: {process.returncode}")
+        else:
+            with tarfile.open(archive, "w:xz", preset=6) as data:
+                for path, name in files:
+                    data.add(path, name, recursive=False)
     (output / f"{archive.name}.sha256").write_text(f"{sha256(archive)}  {archive.name}\n")
     print(f"{archive}: {archive.stat().st_size >> 20} MB, {len(files)} files")
     return archive
@@ -550,6 +595,8 @@ def main():
             auditLinux(buildDir)
         elif PLATFORM == "macos":
             auditMacos(buildDir)
+        if PLATFORM != "windows":
+            strip(buildDir)
         relocate(buildDir)
         package(buildDir, pathlib.Path(arguments.output).resolve())
 

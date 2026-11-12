@@ -13,9 +13,9 @@ and macOS arm64. The approach is the same as GafferHQ/dependencies. The CI publi
 ```sh
 python build.py                                # build every project into build/install (incremental)
 python build.py --projects OpenImageIO         # one project and what it depends on
-python build.py --package                      # build, audit, relocate, pack into build/package/
+python build.py --package                      # build, audit, strip, relocate, pack into build/package/
 python build.py --update-lock                  # download sources missing from lock.json and record their sha256
-python smoke/smoke.py build/package/millcompDependencies-<version>-<platform>.tar.gz   # the test
+python smoke/smoke.py build/package/millcompDependencies-<version>-<platform>.tar.xz   # the test
 python updates.py --dry-run                    # which upstream versions are newer, within each project's series
 ruff format .                                  # formatting (ruff.toml: 120 columns, quotes preserved)
 ```
@@ -53,9 +53,12 @@ proves the archive is complete and relocatable.
   1. Write the manifest.
   2. Audit: `auditLinux` uses `readelf` and only allows `SYSTEM_LIBRARIES`. `auditMacos` uses `otool` and allows only
      `/usr/lib`, `/System/Library` and `@rpath`.
-  3. `relocate()` rewrites absolute prefixes in `.cmake` and `.pc` files to `${CMAKE_CURRENT_LIST_DIR}` and
+  3. `strip()` (Linux, macOS) removes the debug symbols from what the projects built, in place in `build/install`
+     (`strip --strip-unneeded`; on macOS `strip -x` and an ad hoc signature again). `qt/` and `python/` are left as
+     they are: they come stripped (Python is python-build-standalone's `install_only_stripped`).
+  4. `relocate()` rewrites absolute prefixes in `.cmake` and `.pc` files to `${CMAKE_CURRENT_LIST_DIR}` and
      `${pcfiledir}`.
-  4. Pack.
+  5. Pack: `.tar.xz` (through the `xz` program when there is one, multithreaded), `.zip` on Windows.
 
   A library that leaks from the runner (Homebrew, system zstd or expat, …) fails the audit. Fix the project so it uses
   bundled or internal copies rather than loosening the audit.
