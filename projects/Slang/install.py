@@ -24,11 +24,26 @@ def main():
             target = prefix / entry.name
         else:
             continue  # README.md
-        if entry.is_dir():
-            shutil.copytree(entry, target, symlinks=True, dirs_exist_ok=True)
-        else:
-            target.parent.mkdir(parents=True, exist_ok=True)
-            shutil.copy2(entry, target)
+        copy(entry, target)
+
+
+def copy(source, target):
+    """Copies `source` (a file, a symlink as a symlink, or a directory) onto `target`, replacing what is there: files a
+    build that stopped installed without recording them."""
+    if source.is_dir() and not source.is_symlink():
+        target.mkdir(parents=True, exist_ok=True)
+        for entry in source.iterdir():
+            copy(entry, target / entry.name)
+        return
+    target.parent.mkdir(parents=True, exist_ok=True)
+    if target.is_symlink() or target.is_file():
+        target.unlink()
+    elif target.is_dir():
+        shutil.rmtree(target)
+    if source.is_symlink():
+        target.symlink_to(source.readlink())
+    else:
+        shutil.copy2(source, target)
 
 
 if __name__ == "__main__":
