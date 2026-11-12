@@ -7,7 +7,8 @@ download yet for every platform (a release without all its assets) waits for a l
   {'kind': 'git-tags', 'repo': <git URL>, 'tag': <regex; its groups are the version's numbers>, 'series': '3.2'}
   {'kind': 'python-build-standalone', 'series': '3.11'}  the latest release, when it has a newer CPython
   {'kind': 'qt', 'series': '6.12'}                         Qt's online repository, on every platform
-  {'kind': 'pypi', 'package': 'numpy', 'series': '2'}      a pin, package==version, in the project's commands
+  {'kind': 'pypi', 'package': 'numpy', 'series': '2'}      a pin, package==version, in the project's commands; only in
+                                                           the Python project (its version is the Python it must install in)
 `series`: the versions allowed, that one and what is below it ('3.2': 3.2.x; absent: any).
 """
 
@@ -91,11 +92,34 @@ def qt(project, spec, text):
     return (current, found, [("version", current, found)]) if found else None
 
 
+def allows(requires, python):
+    """Whether a Requires-Python specifier (">=3.9,<3.13", "!=3.0.*") accepts the Python version `python`."""
+    for clause in filter(None, (part.strip() for part in (requires or "").split(","))):
+        operator, version = re.fullmatch(r"(~=|===|==|!=|<=|>=|<|>)\s*(.+)", clause).groups()
+        if version.endswith(".*"):  # a prefix
+            prefix = parse(version[:-2])
+            if (python[:len(prefix)] == prefix) != (operator == "=="):
+                return False
+            continue
+        bound = parse(version)
+        padded = python[:len(bound)] + (0,) * (len(bound) - len(python))
+        if operator == "~=":
+            if not (padded >= bound and python[:len(bound) - 1] == bound[:-1]):
+                return False
+        elif not {"==": padded == bound, "===": padded == bound, "!=": padded != bound, "<=": padded <= bound,
+                  ">=": padded >= bound, "<": padded < bound, ">": padded > bound}[operator]:
+            return False
+    return True
+
+
 def pypi(project, spec, text):
+    """A package installed in the archive's Python: only its releases that Python can install."""
     package = spec["package"]
+    python = parse(project["version"])
     current = re.search(rf"'{re.escape(package)}==([\d.]+)'", text).group(1)
     releases = json.loads(get(f"https://pypi.org/pypi/{package}/json"))["releases"]
-    final = [v for v, files in releases.items() if re.fullmatch(r"\d+(\.\d+)*", v) and files and not all(f.get("yanked") for f in files)]
+    final = [v for v, files in releases.items() if re.fullmatch(r"\d+(\.\d+)*", v)
+             and any(not f.get("yanked") and allows(f.get("requires_python"), python) for f in files)]
     found = newest(final, current, spec.get("series"))
     return (current, found, [("plain", f"'{package}=={current}'", f"'{package}=={found}'")]) if found else None
 
