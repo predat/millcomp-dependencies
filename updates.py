@@ -5,7 +5,7 @@ download yet for every platform (a release without all its assets) waits for a l
 
 `updates`, in a project's config.py, is a list of:
   {'kind': 'git-tags', 'repo': <git URL>, 'tag': <regex; its groups are the version's numbers>, 'series': '3.2'}
-  {'kind': 'python-build-standalone', 'series': '3.11'}  the latest release, when it has a newer CPython
+  {'kind': 'python-build-standalone', 'series': '3.13'}  the latest release, when it has a newer CPython
   {'kind': 'qt', 'series': '6.12'}                         Qt's online repository, on every platform
   {'kind': 'pypi', 'package': 'numpy', 'series': '2'}      a pin, package==version, in the project's commands; only in
                                                            the Python project (its version is the Python it must install in)

@@ -23,7 +23,7 @@
            # site-packages, which differs between platforms.
            '-DPXR_PYTHON_INSTALL_DIR=lib/python',
            '-DPXR_INSTALL_LOCATION=../plugin/usd'],
- # python-build-standalone's macOS python3 links Python statically, though its sysconfig names libpython3.11.dylib, so
+ # python-build-standalone's macOS python3 links Python statically, though its sysconfig names libpython3.X.dylib, so
  # USD does not find out by itself: its modules linking libpython would load a second Python in the process, which
  # crashes. They resolve Python's symbols in the process instead; executables still link libpython.
  'cmake:macos': ['-DPXR_PY_UNDEFINED_DYNAMIC_LOOKUP=ON'],
