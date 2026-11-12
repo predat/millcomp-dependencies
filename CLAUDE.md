@@ -31,7 +31,8 @@ proves the archive is complete and relocatable.
 - **`projects/<Name>/config.py`** files are each a single dict literal. `build.py` evaluates them with `eval` and no
   builtins, so they can't contain imports or calls, only literals and comments. Keys are:
   - `version`, `downloads`, `extractTo`, `license`, `dependencies`, `platforms`
-  - `cmake`, `cmakeSource`, `commands`, `moves`, `environment`
+  - `edits` (`[file, old, new]` source changes, `old` found exactly once), `cmake`, `cmakeSource`, `commands`, `moves`,
+    `environment`
   - `updates`
 
   Any key can take a platform suffix: `cmake:macos` or `downloads:windows`. `field()` returns the suffixed value when

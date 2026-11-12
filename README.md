@@ -65,7 +65,7 @@ A few points need care in millComp itself:
   `VK_DRIVER_FILES=$DEPS/share/vulkan/icd.d/MoltenVK_icd.json`, and enable portability enumeration on the instance.
 - **TBB with Qt**: compile with `QT_NO_EMIT`, because TBB uses `emit` as an identifier.
 - **Movies** open with OpenImageIO like images, each frame a subimage (ProRes, DNxHD/DNxHR, H.264, HEVC, VP9, AV1…).
-  `.mxf` is not among its ffmpeg plugin's extensions: ask for the plugin, `OIIO::ImageInput::create("ffmpeg")`. FFmpeg
+  The archive's OpenImageIO also opens `.mxf` and `.webm`, which its ffmpeg plugin does not list upstream. FFmpeg
   is LGPL, without x264 or x265: millComp encodes with ProRes, DNxHR, FFV1, SVT-AV1, or the GPU's H.264/HEVC encoders
   (NVENC, VideoToolbox, Media Foundation). FFmpeg has no CMake package: find `libavcodec/avcodec.h` and the `avcodec`,
   `avformat`, `avutil`, `swscale` libraries in the archive.
@@ -131,6 +131,7 @@ nothing else:
 | `platforms` | the platforms the project is built on (default: all) |
 | `cmake` | CMake options. With this key the project is configured, built and installed with CMake (Ninja, Release, shared libraries, rpaths and the archive's Python are added) |
 | `cmakeSource` | the subdirectory holding `CMakeLists.txt` |
+| `edits` | `[file, old, new]` changes to the sources before building; `old` must be found exactly once |
 | `commands` | commands run after CMake, or instead of it |
 | `moves` | `[from, to]` pairs, moved after the commands |
 | `environment` | extra environment variables |

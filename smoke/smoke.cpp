@@ -43,13 +43,11 @@ static void check(bool ok, const char* name)
 // A movie smoke.py wrote with the archive's ffmpeg, read by OpenImageIO's ffmpeg plugin: its frames are subimages.
 static void checkMovie(const std::string& path, int channels, OIIO::TypeDesc format, const char* name)
 {
-    // .mxf is not among the plugin's extensions: millComp asks for the plugin, as here.
-    auto input = path.ends_with(".mxf") ? OIIO::ImageInput::create("ffmpeg") : OIIO::ImageInput::open(path);
-    OIIO::ImageSpec spec;
-    const bool opened = input && (!path.ends_with(".mxf") || input->open(path, spec));
-    if (!opened)
+    auto input = OIIO::ImageInput::open(path);
+    if (!input)
         std::printf("%s\n", OIIO::geterror().c_str());
-    check(opened, name);
+    check(input != nullptr, name);
+    OIIO::ImageSpec spec;
     int frames = 0;
     while (input->seek_subimage(frames, 0))
         ++frames;

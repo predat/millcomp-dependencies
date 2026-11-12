@@ -231,6 +231,16 @@ def buildProject(name, project, buildDir, workDir, archives, lock, jobs):
         destination = project.get("extractTo")
         extract(file, pathlib.Path(substitute(destination, variables)) if destination else source)
 
+    # Changes to the sources, before building: [file, old, new], `old` found once in the file, or the build stops.
+    for file, old, new in field(project, "edits"):
+        path = source / file
+        with open(path, encoding="utf-8", newline="") as data:
+            text = data.read()
+        if text.count(old) != 1:
+            sys.exit(f"{name}: {file} holds {old!r} {text.count(old)} times, not once")
+        with open(path, "w", encoding="utf-8", newline="") as data:
+            data.write(text.replace(old, new))
+
     environment = dict(os.environ)
     environment["CMAKE_PREFIX_PATH"] = buildDir.as_posix()
     if PLATFORM == "windows":
