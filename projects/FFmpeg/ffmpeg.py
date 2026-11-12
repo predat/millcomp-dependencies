@@ -107,14 +107,17 @@ def main():
         )
         environment["PKG_CONFIG_LIBDIR"] = msys(prefix / "lib/pkgconfig")
         configure = msys(configure)
-        # -L, which configure's MSVC toolchain makes -libpath: (-LIBPATH: would become -libpath:IBPATH:).
-        options += [f"--extra-cflags=-I{prefix.as_posix()}/include", f"--extra-ldflags=-L{prefix.as_posix()}/lib"]
+        # link.exe's flags, given to it as they are (configure makes -L -libpath: in pkg-config's flags only).
+        options += [
+            f"--extra-cflags=-I{prefix.as_posix()}/include",
+            f"--extra-ldflags=-LIBPATH:{prefix.as_posix()}/lib",
+        ]
         # configure looks for zlib as -lz, z.lib; zlib names its import library libz.lib with MSVC (the DLL keeps its
         # name, libz.dll, whatever the import library's): a copy in the build directory.
         zlib = build / "zlib"
         zlib.mkdir(exist_ok=True)
         shutil.copy(prefix / "lib/libz.lib", zlib / "z.lib")
-        options += [f"--extra-ldflags=-L{zlib.as_posix()}"]
+        options += [f"--extra-ldflags=-LIBPATH:{zlib.as_posix()}"]
     else:
         options += [f"--extra-cflags=-I{prefix.as_posix()}/include", f"--extra-ldflags=-L{prefix.as_posix()}/lib"]
         # configure runs cc, whatever CC says: the compiler the other projects use (gcc 14 on the CI's Linux).
