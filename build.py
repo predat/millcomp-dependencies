@@ -409,6 +409,13 @@ def rpaths(path):
 ORIGIN = {"linux": "$ORIGIN", "macos": "@loader_path"}
 
 
+def runTool(command):
+    """Runs a binary tool quietly, and shows what it said when it fails: the exit status alone tells nothing."""
+    result = subprocess.run(command, capture_output=True, text=True, check=False)
+    if result.returncode:
+        sys.exit(f"{' '.join(command)} failed ({result.returncode}):\n{result.stdout}{result.stderr}")
+
+
 def relocateRpaths(buildDir, prefix=None):
     """Makes every run path of the binaries relative to the binary ($ORIGIN, @loader_path): projects add their install
     prefix's lib as an absolute path (OIIO, OpenEXR, MaterialX, libjpeg-turbo; USD every directory it links from), which
@@ -440,20 +447,20 @@ def relocateRpaths(buildDir, prefix=None):
         mode = path.stat().st_mode
         path.chmod(mode | 0o200)  # some install read-only
         if PLATFORM == "linux":
-            command = (
+            runTool(
                 ["patchelf", "--set-rpath", ":".join(after), str(path)]
                 if after
                 else ["patchelf", "--remove-rpath", str(path)]
             )
-            subprocess.run(command, check=True, capture_output=True)
         else:
-            # Deleted then added, in order: -rpath old new fails when new is there already.
-            command = ["install_name_tool"]
+            # Every path deleted, then the new ones added, in two steps: install_name_tool checks -add_rpath against
+            # the run paths the file has before its -delete_rpath, so deleting and adding the same path in one command
+            # fails ("would duplicate path"). A path can be there twice: delete until it is gone.
             for entry in dict.fromkeys(before):
-                command += ["-delete_rpath", entry]
-            for entry in after:
-                command += ["-add_rpath", entry]
-            subprocess.run(command + [str(path)], check=True, capture_output=True)
+                while entry in rpaths(path):
+                    runTool(["install_name_tool", "-delete_rpath", entry, str(path)])
+            if after:
+                runTool(["install_name_tool"] + [arg for entry in after for arg in ("-add_rpath", entry)] + [str(path)])
         path.chmod(mode)
         changed += 1
     print(f"rpaths: {changed} files made relative")
