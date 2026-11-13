@@ -41,8 +41,11 @@ PLATFORM_OPTIONS = {
         "--enable-nvdec",
         "--enable-cuvid",
         # Each library finds the others next to it, ffmpeg and ffprobe in ../lib. configure's tests run in a shell, which
-        # would expand $ORIGIN: the placeholder becomes \$$$$ORIGIN in config.mak (expanded twice by make, once by sh).
-        "--extra-ldflags=-Wl,-rpath,@ORIGIN@/../lib",
+        # would expand $ORIGIN: placeholders, replaced in config.mak. The libraries' link rule is $(eval)'d
+        # (ffbuild/library.mak), so expanded twice by make, then by sh: \$$$$ORIGIN. The programs' is not
+        # (Makefile), once by make, then by sh: \$$ORIGIN (\$$$$ORIGIN gave them $/../lib, which finds nothing).
+        "--extra-ldsoflags=-Wl,-rpath,@SO_ORIGIN@/../lib",
+        "--extra-ldexeflags=-Wl,-rpath,@EXE_ORIGIN@/../lib",
     ],
     "macos": [
         "--enable-pthreads",
@@ -135,14 +138,16 @@ def main():
         raise
     if PLATFORM == "linux":
         config = build / "ffbuild/config.mak"
-        config.write_text(config.read_text().replace("@ORIGIN@", r"\$$$$ORIGIN"))
+        text = config.read_text().replace("@SO_ORIGIN@", r"\$$$$ORIGIN").replace("@EXE_ORIGIN@", r"\$$ORIGIN")
+        config.write_text(text)
     run(["make", f"-j{arguments.jobs}"], build, environment)
     run(["make", "install"], build, environment)
 
-    if PLATFORM == "linux":  # The rpath went through make and sh: check it did unharmed.
-        output = subprocess.run(["readelf", "-d", str(prefix / "lib/libavcodec.so")], capture_output=True, text=True)
-        if "[$ORIGIN/../lib]" not in output.stdout:
-            sys.exit(f"libavcodec.so's rpath is not $ORIGIN/../lib:\n{output.stdout}")
+    if PLATFORM == "linux":  # The rpaths went through make and sh: check they did unharmed, a library's, a program's.
+        for binary in ["lib/libavcodec.so", "bin/ffmpeg"]:
+            output = subprocess.run(["readelf", "-d", str(prefix / binary)], capture_output=True, text=True)
+            if "[$ORIGIN/../lib]" not in output.stdout:
+                sys.exit(f"{binary}'s rpath is not $ORIGIN/../lib:\n{output.stdout}")
 
 
 if __name__ == "__main__":
