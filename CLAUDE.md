@@ -22,7 +22,8 @@ ruff format .                                  # formatting (ruff.toml: 120 colu
 
 On Windows, run from an MSVC developer environment and keep `--work-dir` short (the CI uses `D:/w`), because of
 path-length limits. There are no unit tests. `smoke/smoke.py` is the test: it unpacks an archive into a temporary
-directory, builds `smoke/` (CMake, C++ plus a nanobind module) against it, and runs it along with Python checks. This
+directory, builds `smoke/` (CMake, C++ plus a nanobind module) against it, and runs it along with Python checks, with
+no `LD_LIBRARY_PATH` (Linux: one Python in the process, `pxr` loading no `libpython` beside the static `python3`). This
 proves the archive is complete and relocatable.
 
 ## Architecture
@@ -51,14 +52,20 @@ proves the archive is complete and relocatable.
   recorded in `.stamps/<name>.files` and removed before it is rebuilt, or when the project no longer exists.
 - **`--package`** runs these steps in order:
   1. Write the manifest.
-  2. Audit: `auditLinux` uses `readelf` and only allows `SYSTEM_LIBRARIES`. `auditMacos` uses `otool` and allows only
-     `/usr/lib`, `/System/Library` and `@rpath`.
-  3. `strip()` (Linux, macOS) removes the debug symbols from what the projects built, in place in `build/install`
+  2. `relocateRpaths()` (Linux, macOS) makes every run path of the binaries relative to the binary (`$ORIGIN`,
+     `@loader_path`), in place: projects add their install prefix's `lib` as an absolute path (OIIO, OpenEXR,
+     MaterialX, libjpeg-turbo; USD every directory it links from, Python's `lib` included), which exists on the CI
+     runner only. A path inside the build directory becomes relative, one outside it goes. Linux uses `patchelf`
+     (EPEL in the CI), macOS `install_name_tool` (the signature is redone by `strip()`). `binaries()` is what it, the
+     audits and `strip()` walk: ELF or Mach-O programs and libraries outside `qt/` and `python/`.
+  3. Audit: `auditLinux` uses `readelf` and only allows `SYSTEM_LIBRARIES`. `auditMacos` uses `otool` and allows only
+     `/usr/lib`, `/System/Library` and `@rpath`. Both refuse a run path that is not relative (`nonRelativeRpaths()`).
+  4. `strip()` (Linux, macOS) removes the debug symbols from what the projects built, in place in `build/install`
      (`strip --strip-unneeded`; on macOS `strip -x` and an ad hoc signature again). `qt/` and `python/` are left as
      they are: they come stripped (Python is python-build-standalone's `install_only_stripped`).
-  4. `relocate()` rewrites absolute prefixes in `.cmake` and `.pc` files to `${CMAKE_CURRENT_LIST_DIR}` and
+  5. `relocate()` rewrites absolute prefixes in `.cmake` and `.pc` files to `${CMAKE_CURRENT_LIST_DIR}` and
      `${pcfiledir}`.
-  5. Pack: `.tar.xz` (through the `xz` program when there is one, multithreaded), `.zip` on Windows.
+  6. Pack: `.tar.xz` (through the `xz` program when there is one, multithreaded), `.zip` on Windows.
 
   A library that leaks from the runner (Homebrew, system zstd or expat, …) fails the audit. Fix the project so it uses
   bundled or internal copies rather than loosening the audit.

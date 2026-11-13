@@ -45,9 +45,13 @@
         # site-packages, which differs between platforms.
         '-DPXR_PYTHON_INSTALL_DIR=lib/python',
     ],
-    # python-build-standalone's macOS python3 links Python statically, though its sysconfig names libpython3.X.dylib, so
-    # USD does not find out by itself: its modules linking libpython would load a second Python in the process, which
-    # crashes. They resolve Python's symbols in the process instead; executables still link libpython.
+    # python-build-standalone's python3 links Python statically, on Linux as on macOS, though its sysconfig names
+    # libpython3.X.so / .dylib, so USD does not find out by itself: its libraries and modules linking libpython would
+    # load a second Python in the process (two interpreters' state; on macOS, a crash), and find it only through a
+    # RUNPATH to the build machine's python/lib. They resolve Python's symbols in the process instead: the interpreter's,
+    # or an executable's, since executables still link libpython (pxrTargets gives it to executables only). Windows'
+    # python.exe loads python3X.dll, which the modules then share: nothing to do there.
+    'cmake:linux': ['-DPXR_PY_UNDEFINED_DYNAMIC_LOOKUP=ON'],
     'cmake:macos': ['-DPXR_PY_UNDEFINED_DYNAMIC_LOOKUP=ON'],
     # New versions, within the series (updates.py). millComp: usd-26.11
     'updates': [

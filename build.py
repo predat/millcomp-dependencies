@@ -370,6 +370,106 @@ def writeManifest(projects, names, lock, buildDir):
     (buildDir / "manifest.json").write_text(json.dumps(manifest, indent=2, sort_keys=True) + "\n")
 
 
+def binaries(buildDir):
+    """The programs and libraries the projects built: ELF on Linux, Mach-O on macOS (64-bit or universal), not object
+    files nor symlinks. qt/ and python/ are left out: they come built and relocatable from their own releases."""
+    for path in sorted(buildDir.rglob("*")):
+        relative = path.relative_to(buildDir).as_posix()
+        if path.is_symlink() or not path.is_file() or relative.startswith(("qt/", "python/")):
+            continue
+        with open(path, "rb") as data:
+            header = data.read(18)
+        if PLATFORM == "linux":
+            if header[:4] == b"\x7fELF" and len(header) == 18 and header[16] in (2, 3):  # a program or a library
+                yield path
+        elif header[:4] in (b"\xcf\xfa\xed\xfe", b"\xca\xfe\xba\xbe"):
+            yield path
+
+
+def rpaths(path):
+    """The run paths a binary searches its libraries in: its ELF RUNPATH (or RPATH), its Mach-O LC_RPATHs."""
+    if PLATFORM == "linux":
+        result = subprocess.run(["readelf", "-d", str(path)], capture_output=True, text=True, check=False)
+        for line in result.stdout.splitlines():
+            if "(RUNPATH)" in line or "(RPATH)" in line:
+                return [entry for entry in line.split("[", 1)[1].rsplit("]", 1)[0].split(":") if entry]
+        return []
+    result = subprocess.run(["otool", "-l", str(path)], capture_output=True, text=True, check=False)
+    found, entries = False, []
+    for line in result.stdout.splitlines():
+        words = line.split()
+        if words[:2] == ["cmd", "LC_RPATH"]:
+            found = True
+        elif found and words[:1] == ["path"]:
+            entries.append(line.split("path", 1)[1].rsplit(" (offset", 1)[0].strip())
+            found = False
+    return entries
+
+
+ORIGIN = {"linux": "$ORIGIN", "macos": "@loader_path"}
+
+
+def relocateRpaths(buildDir, prefix=None):
+    """Makes every run path of the binaries relative to the binary ($ORIGIN, @loader_path): projects add their install
+    prefix's lib as an absolute path (OIIO, OpenEXR, MaterialX, libjpeg-turbo; USD every directory it links from), which
+    exists on the build machine only, and a library that then finds nothing there falls back on whatever the user's
+    machine has. A path inside `prefix` (default: buildDir, where the files are) becomes relative; one outside it (the
+    build machine's) goes; duplicates go. Linux needs patchelf; macOS's install_name_tool voids the signature, which
+    strip() signs again. Running it again changes nothing."""
+    prefix = (prefix or buildDir).as_posix().rstrip("/")
+    origin = ORIGIN[PLATFORM]
+    changed = 0
+    for path in binaries(buildDir):
+        before = rpaths(path)
+        after = []
+        for entry in before:
+            if entry.startswith(("$ORIGIN", "@loader_path", "@executable_path")):
+                parts = entry.split("/", 1)
+                kept = parts[0] + ("/" + os.path.normpath(parts[1]) if len(parts) > 1 else "")
+            elif entry == prefix or entry.startswith(prefix + "/"):
+                target = (buildDir / entry[len(prefix) :].lstrip("/")).as_posix()
+                relative = os.path.relpath(target, path.parent.as_posix()).replace(os.sep, "/")
+                kept = origin if relative == "." else f"{origin}/{relative}"
+            else:
+                continue  # the build machine's, outside the archive
+            kept = kept.removesuffix("/.")
+            if kept not in after:
+                after.append(kept)
+        if after == before:
+            continue
+        mode = path.stat().st_mode
+        path.chmod(mode | 0o200)  # some install read-only
+        if PLATFORM == "linux":
+            command = (
+                ["patchelf", "--set-rpath", ":".join(after), str(path)]
+                if after
+                else ["patchelf", "--remove-rpath", str(path)]
+            )
+            subprocess.run(command, check=True, capture_output=True)
+        else:
+            # Deleted then added, in order: -rpath old new fails when new is there already.
+            command = ["install_name_tool"]
+            for entry in dict.fromkeys(before):
+                command += ["-delete_rpath", entry]
+            for entry in after:
+                command += ["-add_rpath", entry]
+            subprocess.run(command + [str(path)], check=True, capture_output=True)
+        path.chmod(mode)
+        changed += 1
+    print(f"rpaths: {changed} files made relative")
+
+
+def nonRelativeRpaths(buildDir, files):
+    """What the audits refuse: a run path of `files` (binaries()) that is not relative to the binary, so leads to the
+    build machine."""
+    return [
+        f"{file.relative_to(buildDir)} searches {entry}"
+        for file in files
+        for entry in rpaths(file)
+        if not entry.startswith(("$ORIGIN", "@loader_path", "@executable_path"))
+    ]
+
+
 def auditLinux(buildDir):
     """Fails on a library that needs something neither in the archive nor in SYSTEM_LIBRARIES: a dependency that a
     project found on the build machine, and that a user of the archive does not have."""
@@ -388,6 +488,7 @@ def auditLinux(buildDir):
             needed = line.split("[")[1].split("]")[0]
             if needed not in shipped and not any(fnmatch.fnmatch(needed, pattern) for pattern in SYSTEM_LIBRARIES):
                 failures.append(f"{file.relative_to(buildDir)} needs {needed}")
+    failures += nonRelativeRpaths(buildDir, binaries(buildDir))
     if failures:
         sys.exit("libraries found on the build machine:\n  " + "\n  ".join(sorted(set(failures))))
     print(f"audit: {len(files)} files, nothing from the build machine")
@@ -421,6 +522,7 @@ def auditMacos(buildDir):
             ):
                 continue
             failures.append(f"{file.relative_to(buildDir)} needs {needed}")
+    failures += nonRelativeRpaths(buildDir, binaries(buildDir))
     if failures:
         sys.exit("libraries found on the build machine:\n  " + "\n  ".join(sorted(set(failures))))
     print(f"audit: {len(files)} files, nothing from the build machine")
@@ -432,21 +534,11 @@ def strip(buildDir):
     come from builds stripped already (and numpy's wheel libraries, edited by patchelf, are better left alone).
     Windows keeps them apart, in the .pdb files the archive leaves out."""
     before = after = 0
-    for path in sorted(buildDir.rglob("*")):
-        relative = path.relative_to(buildDir).as_posix()
-        if path.is_symlink() or not path.is_file() or relative.startswith(("qt/", "python/")):
-            continue
-        with open(path, "rb") as data:
-            header = data.read(18)
+    for path in binaries(buildDir):
         if PLATFORM == "linux":
-            # ELF, and a program or a library (e_type 2 or 3), not an object file
-            if header[:4] != b"\x7fELF" or header[16] not in (2, 3):
-                continue
             command = [["strip", "--strip-unneeded", str(path)]]
         else:
-            # Mach-O, 64-bit (or universal): arm64 runs signed code only, and stripping drops the signature
-            if header[:4] not in (b"\xcf\xfa\xed\xfe", b"\xca\xfe\xba\xbe"):
-                continue
+            # arm64 runs signed code only, and stripping (and relocateRpaths()) drops the signature
             command = [["strip", "-x", str(path)], ["codesign", "--force", "--sign", "-", str(path)]]
         size = path.stat().st_size
         mode = path.stat().st_mode
@@ -591,6 +683,8 @@ def main():
 
     if arguments.package:
         writeManifest(projects, names, lock, buildDir)
+        if PLATFORM != "windows":
+            relocateRpaths(buildDir)
         if PLATFORM == "linux":
             auditLinux(buildDir)
         elif PLATFORM == "macos":

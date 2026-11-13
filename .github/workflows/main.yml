@@ -36,15 +36,16 @@ jobs:
     env:
       WORK: ${{ matrix.platform == 'windows' && 'D:/w' || 'build/work' }}
     steps:
-      # Before the checkout, which needs git. Python 3.12 runs build.py; the rest builds or runs the archive (the smoke
-      # test's Qt needs glib, fontconfig, GL, EGL, xkbcommon).
+      # Before the checkout, which needs git. Python 3.12 runs build.py; patchelf (EPEL) makes the run paths relative
+      # (build.py's relocateRpaths()); the rest builds or runs the archive (the smoke test's Qt needs glib, fontconfig,
+      # GL, EGL, xkbcommon).
       - name: Linux packages
         if: matrix.platform == 'linux'
         run: |
           dnf -y install dnf-plugins-core epel-release
           dnf config-manager --set-enabled crb
           dnf -y install git tar xz zstd gzip findutils which binutils make perl pkgconf-pkg-config nasm \
-            gcc-toolset-14-gcc gcc-toolset-14-gcc-c++ gcc-toolset-14-binutils python3.12 python3.12-pip \
+            gcc-toolset-14-gcc gcc-toolset-14-gcc-c++ gcc-toolset-14-binutils python3.12 python3.12-pip patchelf \
             mesa-libGL-devel mesa-libEGL-devel libX11-devel libxkbcommon-devel libxcb xcb-util-cursor \
             glib2 fontconfig dbus-libs
           ln -sf /usr/bin/python3.12 /usr/local/bin/python

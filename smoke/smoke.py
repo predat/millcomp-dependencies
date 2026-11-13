@@ -40,10 +40,9 @@ def main():
         if sys.platform == "darwin":
             # The Vulkan loader looks for drivers in system places only: millComp points it at the archive's MoltenVK too.
             environment["VK_DRIVER_FILES"] = str(deps / "share/vulkan/icd.d/MoltenVK_icd.json")
-        if not windows:
-            environment["LD_LIBRARY_PATH"] = os.pathsep.join(
-                str(path) for path in [deps / "lib", deps / "qt/lib", deps / "python/lib"]
-            )
+        # No LD_LIBRARY_PATH: the archive's binaries find their libraries through run paths relative to themselves
+        # (build.py's relocateRpaths()), which this test proves; Windows has none, PATH above does it there.
+        environment.pop("LD_LIBRARY_PATH", None)
         build = temporary / "build"
         subprocess.run(
             [
@@ -74,6 +73,11 @@ def main():
         environment["PYTHONPATH"] = os.pathsep.join([str(build), str(deps / "lib/python")])
         check = "import _smoke, numpy; from pxr import Usd, Sdf; assert _smoke.answer() == 42 and Usd.Stage.CreateInMemory(); print('Python:', numpy.__version__)"
         subprocess.run([str(python), "-c", check], check=True, env=environment)
+        if sys.platform.startswith("linux"):
+            # python3 links Python statically: pxr must use that one, never load libpython3.X.so beside it (a second
+            # interpreter in the process; USD's PXR_PY_UNDEFINED_DYNAMIC_LOOKUP).
+            single = "from pxr import Usd; mapped = [line for line in open('/proc/self/maps') if 'libpython' in line]; assert not mapped, mapped"
+            subprocess.run([str(python), "-c", single], check=True, env=environment)
         # Open files on Windows would fail the cleanup.
         shutil.rmtree(build, ignore_errors=True)
 
