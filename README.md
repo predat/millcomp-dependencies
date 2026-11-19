@@ -26,6 +26,7 @@ The archive contains the following libraries:
 - **Python**, from python-build-standalone, with numpy
 - **nanobind** and **robin-map**
 - **fmt** and **GoogleTest**
+- **libstdc++** from GCC 14, on Linux: Slang's prebuilt `libslang-llvm.so` needs a newer one than Rocky 9's
 - **zlib**, **libpng**, **libjpeg-turbo**, **libtiff** and **FreeType**
 - **FFmpeg** (LGPL), with **dav1d**, **SVT-AV1** and the NVENC/NVDEC headers: OpenImageIO reads movies through it, and
   millComp can write them with its API
@@ -38,6 +39,7 @@ Most projects are compiled from source. A few are taken prebuilt from their offi
 - Slang
 - MoltenVK
 - Python, from python-build-standalone
+- libstdc++ (Linux), conda-forge's build of GCC 14's
 
 ## Using an archive
 
