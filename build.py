@@ -148,7 +148,7 @@ def extract(archive, destination):
     temporary = destination.with_name(destination.name + ".extract")
     shutil.rmtree(temporary, ignore_errors=True)
     temporary.mkdir(parents=True)
-    if archive.name.endswith(".zip"):
+    if archive.name.endswith((".zip", ".conda")):  # a conda package is a zip
         with zipfile.ZipFile(archive) as data:
             data.extractall(temporary)
     else:
