@@ -18,7 +18,7 @@ jobs:
         include:
           # Rocky Linux 9, as the studio: glibc 2.34, which the archive then runs on and above. gcc-toolset-14 links the
           # system's libstdc++ (GCC 11) and what it lacks statically; the prebuilt libslang-llvm.so needs GCC 12's, so the
-          # archive ships GCC 14's libstdc++.so.6 (projects/LibStdCxx).
+          # archive ships GCC 14's libstdc++.so.6 in lib/compat (projects/LibStdCxx).
           - os: ubuntu-24.04
             platform: linux
             container: rockylinux/rockylinux:9

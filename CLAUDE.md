@@ -23,7 +23,7 @@ ruff format .                                  # formatting (ruff.toml: 120 colu
 On Windows, run from an MSVC developer environment and keep `--work-dir` short (the CI uses `D:/w`), because of
 path-length limits. There are no unit tests. `smoke/smoke.py` is the test: it unpacks an archive into a temporary
 directory, builds `smoke/` (CMake, C++ plus a nanobind module) against it, and runs it along with Python checks, with
-no `LD_LIBRARY_PATH` (Linux: one Python in the process, `pxr` loading no `libpython` beside the static `python3`; `libslang-llvm.so` loading with the archive's libstdc++). This
+no `LD_LIBRARY_PATH` (Linux: one Python in the process, `pxr` loading no `libpython` beside the static `python3`; `libslang-llvm.so` loading with the archive's `lib/compat` libstdc++). This
 proves the archive is complete and relocatable.
 
 ## Architecture
@@ -73,10 +73,13 @@ proves the archive is complete and relocatable.
   bundled or internal copies rather than loosening the audit.
 - **libstdc++ (Linux).** What `build.py` compiles needs only Rocky 9's libstdc++ (GCC 11): gcc-toolset-14 links what
   that one lacks statically. Slang's prebuilt `libslang-llvm.so` (the CPU path of millComp's user Slang nodes) needs
-  `GLIBCXX_3.4.30` (GCC 12), so `projects/LibStdCxx` ships GCC 14's `libstdc++.so.6` in `lib/` (conda-forge's build,
-  against glibc 2.17; Rocky 9's `libgcc_s` is enough for it), never `libstdc++.so` (a link must keep the compiler's).
-  The archive's libraries load it through their `$ORIGIN` run paths, millComp's through the archive's `lib` in theirs.
-  The smoke test loads `libslang-llvm.so` and checks that the libstdc++ mapped is the archive's.
+  `GLIBCXX_3.4.30` (GCC 12), so `projects/LibStdCxx` ships GCC 14's `libstdc++.so.6` in `lib/compat/` (conda-forge's
+  build, against glibc 2.17; Rocky 9's `libgcc_s` is enough for it), never `libstdc++.so` (a link must keep the
+  compiler's). Not in `lib/`: a process holds one libstdc++, the newest it needs, and a consumer built with a GCC newer
+  than 14 needs its own (1.0.6 had it in `lib/`, which every `$ORIGIN` run path names: GCC 16 builds failed on
+  `GLIBCXX_3.4.35`). The consumer puts `lib/compat/` in its run paths when its compiler's libstdc++ is older (millComp:
+  `cmake/MillcompDependencies.cmake`). The smoke test loads it, then `libslang-llvm.so`, and checks that the libstdc++
+  mapped is the archive's.
 - **`updates.py`** checks upstream for new versions: git tags, python-build-standalone releases, Qt's online
   repository, and PyPI. PyPI candidates are filtered by `Requires-Python` against the archive's Python. It updates
   `config.py` (the version wherever it appears) and `lock.json`. Each project's `updates` list sets its source and an

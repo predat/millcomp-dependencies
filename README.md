@@ -26,7 +26,9 @@ The archive contains the following libraries:
 - **Python**, from python-build-standalone, with numpy
 - **nanobind** and **robin-map**
 - **fmt** and **GoogleTest**
-- **libstdc++** from GCC 14, on Linux: Slang's prebuilt `libslang-llvm.so` needs a newer one than Rocky 9's
+- **libstdc++** from GCC 14, on Linux, in `lib/compat/`: Slang's prebuilt `libslang-llvm.so` needs a newer one than
+  Rocky 9's. Put `lib/compat` in your run paths (or `LD_LIBRARY_PATH`) only when your compiler's libstdc++ is older
+  than GCC 14's: a process loads one libstdc++, the newest it needs
 - **zlib**, **libpng**, **libjpeg-turbo**, **libtiff** and **FreeType**
 - **FFmpeg** (LGPL), with **dav1d**, **SVT-AV1** and the NVENC/NVDEC headers: OpenImageIO reads movies through it, and
   millComp can write them with its API
