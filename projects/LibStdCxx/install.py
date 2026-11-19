@@ -1,8 +1,10 @@
 #!/usr/bin/env python3
 """Installs libstdc++.so.6 from a conda package (a zip holding pkg-*.tar.zst, which Python 3.12's tarfile cannot read:
-tar --zstd unpacks it) in lib/, and its licences in licenses/LibStdCxx: the package's runtime library exception, and
-GPL 3 with it from the build machine's GCC (Rocky's libgcc). Not libstdc++.so: a link against the archive must keep
-taking the compiler's own libstdc++, never this one."""
+tar --zstd unpacks it) in lib/compat/, and its licences in licenses/LibStdCxx: the package's runtime library exception, and
+GPL 3 with it from the build machine's GCC (Rocky's libgcc). In lib/compat/, which no run path of the archive names:
+a process holds one libstdc++, the newest it needs, and a program built with a newer GCC than 14 needs its own; the
+consumer (millComp's cmake/MillcompDependencies.cmake) puts lib/compat/ in its run paths only when its compiler's is
+older. Not libstdc++.so: a link against the archive must keep taking the compiler's own libstdc++, never this one."""
 
 import argparse
 import os
@@ -31,9 +33,10 @@ def main():
     if len(libraries) != 1:
         sys.exit(f"{unpacked / 'lib'}: {len(libraries)} libstdc++.so.6.*, not one")
     library = libraries[0]
-    (prefix / "lib").mkdir(parents=True, exist_ok=True)
-    shutil.copy2(library, prefix / "lib" / library.name)
-    link = prefix / "lib/libstdc++.so.6"
+    compat = prefix / "lib/compat"
+    compat.mkdir(parents=True, exist_ok=True)
+    shutil.copy2(library, compat / library.name)
+    link = compat / "libstdc++.so.6"
     if link.is_symlink() or link.exists():
         link.unlink()
     os.symlink(library.name, link)

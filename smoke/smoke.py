@@ -78,10 +78,12 @@ def main():
             # interpreter in the process; USD's PXR_PY_UNDEFINED_DYNAMIC_LOOKUP).
             single = "from pxr import Usd; mapped = [line for line in open('/proc/self/maps') if 'libpython' in line]; assert not mapped, mapped"
             subprocess.run([str(python), "-c", single], check=True, env=environment)
-            # Slang's CPU path: libslang-llvm.so needs GLIBCXX_3.4.30 (GCC 12), more than Rocky 9's libstdc++ has; the
-            # archive's (projects/LibStdCxx), found through its run path, must be the one loaded.
+            # Slang's CPU path: libslang-llvm.so needs GLIBCXX_3.4.30 (GCC 12), more than Rocky 9's libstdc++ has. The
+            # archive's lib/compat/libstdc++.so.6 (projects/LibStdCxx) loaded first, as a consumer whose compiler's is
+            # older does through its run paths, must be the one libslang-llvm.so then uses.
             llvm = deps / "lib/libslang-llvm.so"
-            loads = f"import ctypes; ctypes.CDLL({str(llvm)!r}); mapped = {{line.split()[-1] for line in open('/proc/self/maps') if 'libstdc++' in line}}; assert all(path.startswith({str(deps)!r}) for path in mapped), mapped"
+            compat = deps / "lib/compat/libstdc++.so.6"
+            loads = f"import ctypes; ctypes.CDLL({str(compat)!r}); ctypes.CDLL({str(llvm)!r}); mapped = {{line.split()[-1] for line in open('/proc/self/maps') if 'libstdc++' in line}}; assert all(path.startswith({str(deps)!r}) for path in mapped), mapped"
             subprocess.run([str(python), "-c", loads], check=True, env=environment)
         # Open files on Windows would fail the cleanup.
         shutil.rmtree(build, ignore_errors=True)
