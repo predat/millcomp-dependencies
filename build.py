@@ -28,7 +28,14 @@ PLATFORM = {"win32": "windows", "darwin": "macos"}.get(
     sys.platform, "linux" if sys.platform.startswith("linux") else None
 )
 # Bump to rebuild everything: what build.py passes to every project changed.
-DRIVER_REVISION = 1
+DRIVER_REVISION = 2  # 2: -ffp-contract=off on every CMake project (FP_FLAGS)
+
+# No FMA contraction in what the CMake projects compile (gcc defaults to -ffp-contract=fast, clang to on): millComp's
+# GPU kernels and its tests match OpenImageIO's warp and convolve and oiiotool bit for bit as computed without
+# contraction. On Linux it only held because x86-64's baseline has no FMA (a -march=x86-64-v3 build, as CachyOS's OIIO,
+# moved 44 of millComp's tests by an ulp); arm64 always has it, and OIIO turns contraction off only for USE_SIMD=fma.
+# MSVC's /fp:precise contracts nothing since Visual Studio 2022 (17.0).
+FP_FLAGS = "-ffp-contract=off"
 
 # Left out of the archive: not needed to build against the dependencies or to run them.
 EXCLUDED = [
@@ -287,9 +294,15 @@ def buildProject(name, project, buildDir, workDir, archives, lock, jobs):
             "-DPython3_FIND_STRATEGY=LOCATION",
         ]
         if PLATFORM == "linux":
-            arguments += ["-DCMAKE_INSTALL_RPATH=$ORIGIN/../lib", "-DCMAKE_C_FLAGS=-fPIC", "-DCMAKE_CXX_FLAGS=-fPIC"]
+            arguments += [
+                "-DCMAKE_INSTALL_RPATH=$ORIGIN/../lib",
+                f"-DCMAKE_C_FLAGS=-fPIC {FP_FLAGS}",
+                f"-DCMAKE_CXX_FLAGS=-fPIC {FP_FLAGS}",
+            ]
         elif PLATFORM == "macos":
             arguments += [
+                f"-DCMAKE_C_FLAGS={FP_FLAGS}",
+                f"-DCMAKE_CXX_FLAGS={FP_FLAGS}",
                 "-DCMAKE_INSTALL_RPATH=@loader_path/../lib",
                 "-DCMAKE_INSTALL_NAME_DIR=@rpath",
                 f"-DCMAKE_OSX_DEPLOYMENT_TARGET={MACOS_DEPLOYMENT_TARGET}",

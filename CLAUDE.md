@@ -40,7 +40,9 @@ proves the archive is complete and relocatable.
   it exists, and the plain one otherwise. Strings are `str.format` templates with these variables: `{buildDir}`,
   `{work}`, `{source}`, `{python}` (the archive's own Python, so projects running it must depend on `Python`),
   `{projectDir}` and `{jobs}`. When a project has `cmake` keys, `build.py` adds common flags: Ninja, Release, shared
-  libraries, rpaths, the Python location, and on macOS the deployment target 14.4 and Homebrew prefixes ignored.
+  libraries, rpaths, `-ffp-contract=off` (`FP_FLAGS`: no FMA contraction, which millComp's bit-exact tests against
+  OIIO need; MSVC does not contract), the Python location, and on macOS the deployment target 14.4 and Homebrew
+  prefixes ignored.
   Helper scripts sit next to the config (`Qt/fetch.py`, `Slang/macos.py`, `MoltenVK/install.py`,
   `MaterialX/noX11.cmake`, `FFmpeg/ffmpeg.py`). FFmpeg is configured by `ffmpeg.py` (LGPL only, `--disable-autodetect`;
   on Windows through MSYS2's bash with MSVC); Dav1d uses Meson through `commands`.
