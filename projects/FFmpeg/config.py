@@ -1,7 +1,7 @@
 {
-    'version': '9.0.2',
+    'version': '9.1',
     'url': 'https://ffmpeg.org',
-    'downloads': ['https://github.com/FFmpeg/FFmpeg/archive/refs/tags/n9.0.2.tar.gz'],
+    'downloads': ['https://github.com/FFmpeg/FFmpeg/archive/refs/tags/n9.1.tar.gz'],
     # LGPL 2.1 or later: no GPL or nonfree part is enabled (ffmpeg.py).
     'license': ['LICENSE.md', 'COPYING.LGPLv2.1'],
     'dependencies': ['Python', 'ZLib', 'Dav1d', 'SVT-AV1'],
