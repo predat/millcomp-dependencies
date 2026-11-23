@@ -26,6 +26,7 @@ The archive contains the following libraries:
 - **Python**, from python-build-standalone, with numpy
 - **nanobind** and **robin-map**
 - **fmt** and **GoogleTest**
+- **spz** (v2.1.0, static): the `.spz` codec of 3D Gaussian splats, which reads `.spz` versions 1 to 3
 - **libstdc++** from GCC 14, on Linux, in `lib/compat/`: Slang's prebuilt `libslang-llvm.so` needs a newer one than
   Rocky 9's. Put `lib/compat` in your run paths (or `LD_LIBRARY_PATH`) only when your compiler's libstdc++ is older
   than GCC 14's: a process loads one libstdc++, the newest it needs

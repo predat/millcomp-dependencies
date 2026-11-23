@@ -23,8 +23,11 @@
 extern "C" {
 #include <libavcodec/avcodec.h>
 }
+#include <load-spz.h>
 
 #include <atomic>
+#include <cmath>
+#include <cstdint>
 #include <initializer_list>
 #include <memory>
 #include <cstdio>
@@ -98,6 +101,20 @@ int main(int argc, char** argv)
 
     const auto config = OCIO_NAMESPACE::Config::CreateFromFile("ocio://default");
     check(config && config->getColorSpace("ACEScg"), "OpenColorIO");
+
+    // One splat through spz's .spz writer and reader (gzip: the archive's zlib).
+    spz::GaussianCloud cloud;
+    cloud.numPoints = 1;
+    cloud.positions = {1.0f, 2.0f, 3.0f};
+    cloud.scales = {-1.0f, -1.0f, -1.0f};
+    cloud.rotations = {0.0f, 0.0f, 0.0f, 1.0f};
+    cloud.alphas = {0.5f};
+    cloud.colors = {0.25f, 0.5f, 0.75f};
+    std::vector<uint8_t> spzBytes;
+    const bool spzSaved = spz::saveSpz(cloud, spz::PackOptions{}, &spzBytes);
+    const spz::GaussianCloud spzBack = spz::loadSpz(spzBytes, spz::UnpackOptions{});
+    check(spzSaved && spzBack.numPoints == 1 && spzBack.positions.size() == 3 && std::abs(spzBack.positions[1] - 2.0f) < 0.01f,
+          "spz");
 
     const auto stage = UsdStage::CreateInMemory("smoke.usda");
     const UsdPrim prim = stage->DefinePrim(SdfPath("/comp"));
