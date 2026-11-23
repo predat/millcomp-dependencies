@@ -16,6 +16,8 @@ find_package(slang CONFIG REQUIRED)
 find_package(GTest REQUIRED CONFIG)
 find_package(nanobind CONFIG REQUIRED)
 find_package(MaterialX 1.39 REQUIRED CONFIG)
+# spz v2.1.0 calls its CMake project 1.1.0.
+find_package(spz 1.1 REQUIRED CONFIG)
 # FFmpeg has no CMake package: its headers and libraries, found in CMAKE_PREFIX_PATH.
 find_path(FFMPEG_INCLUDE_DIR libavcodec/avcodec.h REQUIRED)
 find_library(FFMPEG_AVCODEC avcodec REQUIRED)
@@ -39,6 +41,7 @@ target_link_libraries(
         MaterialXFormat
         MaterialXGenShader
         MaterialXGenSlang
+        spz::spz
         Qt6::Widgets
         Qt6::Svg
         Qt6::ShaderTools
