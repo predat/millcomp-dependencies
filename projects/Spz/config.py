@@ -13,5 +13,8 @@
         # worth a run path. Position-independent anyway (its CMakeLists.txt sets it): it goes into libmillcomp.
         '-DBUILD_SHARED_LIBS=OFF',
         '-DBUILD_PYTHON_BINDINGS=OFF',
+        # Its library target asks for C++17, its command-line tools do not: MSVC (C++14 by default) refuses their
+        # structured bindings. The standard for every target.
+        '-DCMAKE_CXX_STANDARD=17',
     ],
 }
