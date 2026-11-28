@@ -1,7 +1,7 @@
 {
-    'version': '3.5.4',
+    'version': '3.5.5',
     'url': 'https://openexr.com',
-    'downloads': ['https://github.com/AcademySoftwareFoundation/openexr/archive/refs/tags/v3.5.4.tar.gz'],
+    'downloads': ['https://github.com/AcademySoftwareFoundation/openexr/archive/refs/tags/v3.5.5.tar.gz'],
     'license': ['LICENSE.md'],
     'dependencies': ['Imath', 'ZLib'],
     'cmake': [
