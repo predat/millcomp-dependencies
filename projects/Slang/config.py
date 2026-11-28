@@ -1,14 +1,14 @@
 {
-    'version': '2026.22',
+    'version': '2026.23',
     'url': 'https://shader-slang.org',
     'downloads:linux': [
-        'https://github.com/shader-slang/slang/releases/download/v2026.22/slang-2026.22-linux-x86_64.tar.gz'
+        'https://github.com/shader-slang/slang/releases/download/v2026.23/slang-2026.23-linux-x86_64.tar.gz'
     ],
     'downloads:windows': [
-        'https://github.com/shader-slang/slang/releases/download/v2026.22/slang-2026.22-windows-x86_64.zip'
+        'https://github.com/shader-slang/slang/releases/download/v2026.23/slang-2026.23-windows-x86_64.zip'
     ],
     'downloads:macos': [
-        'https://github.com/shader-slang/slang/releases/download/v2026.22/slang-2026.22-macos-aarch64.tar.gz'
+        'https://github.com/shader-slang/slang/releases/download/v2026.23/slang-2026.23-macos-aarch64.tar.gz'
     ],
     # install.py copies it into the prefix, licences in licenses/Slang (not extracted there: see install.py).
     'dependencies': ['Python'],

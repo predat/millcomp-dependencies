@@ -15,7 +15,7 @@
     'license:linux': ['lib/python3.13/LICENSE.txt'],
     'license:windows': ['LICENSE.txt'],
     'license:macos': ['lib/python3.13/LICENSE.txt'],
-    'commands': [['{python}', '-m', 'pip', 'install', '--no-cache-dir', 'numpy==2.5.4']],
+    'commands': [['{python}', '-m', 'pip', 'install', '--no-cache-dir', 'numpy==2.5.5']],
     # New versions, within the series (updates.py). millComp: python-3.13, numpy-2
     'updates': [
         {'kind': 'python-build-standalone', 'series': '3.13'},

@@ -1,7 +1,7 @@
 {
-    'version': '1.5.4',
+    'version': '1.5.5',
     'url': 'https://code.videolan.org/videolan/dav1d',
-    'downloads': ['https://code.videolan.org/videolan/dav1d/-/archive/1.5.4/dav1d-1.5.4.tar.gz'],
+    'downloads': ['https://code.videolan.org/videolan/dav1d/-/archive/1.5.5/dav1d-1.5.5.tar.gz'],
     'license': ['COPYING'],
     # FFmpeg's AV1 decoder: its own decodes with a GPU only.
     'commands': [
